@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Multiplayer Voxel Physics - Destructible Players</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: black;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        
+        canvas {
+            display: block;
+            cursor: none;
+        }
+        
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 18px;
+            z-index: 100;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        #debug {
+            position: absolute;
+            top: 80px;
+            left: 20px;
+            color: lime;
+            font-size: 12px;
+            z-index: 100;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 350px;
+            font-family: monospace;
+        }
+        
+        #instructions {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 14px;
+            z-index: 100;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 5px;
+            line-height: 1.4;
+            max-width: 300px;
+        }
+        
+        #connection-status {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: red;
+            font-size: 14px;
+            z-index: 100;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        #ping-display {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: lime;
+            font-size: 14px;
+            z-index: 100;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            z-index: 200;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Game Canvas -->
+    <canvas id="canvas"></canvas>
+    
+    <!-- UI Elements -->
+    <div id="loading">
+        <h2>🎮 Loading Multiplayer Voxel Game...</h2>
+        <p>Connecting to server...</p>
+    </div>
+    
+    <div id="info" class="hidden">FPS: 0</div>
+    
+    <div id="debug" class="hidden">Connecting to server...</div>
+    
+    <div id="connection-status" class="hidden">🔴 Disconnected from server</div>
+    
+    <div id="ping-display" class="hidden">📡 Ping: --ms</div>
+    
+    <div id="instructions" class="hidden">
+        <strong>🎯 Destructible Voxel Players!</strong><br><br>
+        
+        <strong>🎮 Controls:</strong><br>
+        WASD: Move around<br>
+        Mouse: Look around<br>
+        Space: Jump<br>
+        Left Click: Shoot voxels<br>
+        ESC: Exit mouse control<br><br>
+        
+        <strong>⚙️ Settings:</strong><br>
+        T: Toggle Smooth/Raw mode<br>
+        C: Toggle Color/Gray mode<br><br>
+        
+        <strong>🏗️ Technical Features:</strong><br>
+        🧱 Players are hollow orange shells<br>
+        🎨 Greedy meshing for optimization<br>
+        👁️ Clean first-person view<br>
+        💥 Destructible player bodies<br>
+        🎯 Shoot other players apart!<br>
+        ⚡ 50 TPS server physics<br>
+        👥 Real-time multiplayer<br><br>
+        
+        <strong>🎲 How to Play:</strong><br>
+        1. Move around with WASD<br>
+        2. Aim with mouse<br>
+        3. Shoot other players to knock voxels off<br>
+        4. Survive as long as possible!<br>
+        5. Open multiple tabs for more players
+    </div>
+
+    <!-- Game Scripts -->
+    <script type="module">
+        // Import all game modules
+        import { VoxelClient } from './VoxelClient.js';
+
+        // Global variables
+        let client;
+        let isGameLoaded = false;
+
+        /**
+         * Initializes the game
+         */
+        async function initializeGame() {
+            try {
+                console.log('🚀 Starting Multiplayer Voxel Client...');
+                
+                // Get canvas and set initial size
+                const canvas = document.getElementById('canvas');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                // Create client
+                client = new VoxelClient(canvas);
+                
+                // Connect to server
+                client.connect('ws://localhost:8765');
+                
+                // Hide loading screen and show UI
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('info').classList.remove('hidden');
+                document.getElementById('debug').classList.remove('hidden');
+                document.getElementById('connection-status').classList.remove('hidden');
+                document.getElementById('ping-display').classList.remove('hidden');
+                document.getElementById('instructions').classList.remove('hidden');
+                
+                // Start game loop
+                client.start();
+                
+                isGameLoaded = true;
+                console.log('✅ Game initialized successfully!');
+                
+            } catch (error) {
+                console.error('❌ Failed to initialize game:', error);
+                document.getElementById('loading').innerHTML = `
+                    <h2>❌ Failed to Load Game</h2>
+                    <p>Error: ${error.message}</p>
+                    <button onclick="location.reload()">🔄 Retry</button>
+                `;
+            }
+        }
+
+        /**
+         * Handles window resize
+         */
+        function handleResize() {
+            if (client && isGameLoaded) {
+                client.resize();
+            }
+        }
+
+        /**
+         * Handles page visibility changes
+         */
+        function handleVisibilityChange() {
+            if (document.hidden) {
+                console.log('📱 Page hidden - game paused');
+            } else {
+                console.log('📱 Page visible - game resumed');
+            }
+        }
+
+        /**
+         * Cleanup when page is about to unload
+         */
+        function handleBeforeUnload() {
+            if (client) {
+                console.log('👋 Page unloading - cleaning up...');
+                client.cleanup();
+            }
+        }
+
+        // Set up event listeners
+        window.addEventListener('load', initializeGame);
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        // Expose client to global scope for debugging
+        window.voxelClient = () => client;
+        window.getGameStats = () => client ? client.getStats() : null;
+
+        // Error handling
+        window.addEventListener('error', (event) => {
+            console.error('💥 Global error:', event.error);
+            
+            if (!isGameLoaded) {
+                document.getElementById('loading').innerHTML = `
+                    <h2>💥 Critical Error</h2>
+                    <p>${event.error.message}</p>
+                    <button onclick="location.reload()">🔄 Reload</button>
+                `;
+            }
+        });
+
+        // Performance monitoring
+        let performanceLog = [];
+        setInterval(() => {
+            if (client && isGameLoaded) {
+                const stats = client.getStats();
+                performanceLog.push({
+                    time: Date.now(),
+                    fps: stats.performance?.total ? 1000 / stats.performance.total : 0,
+                    movingVoxels: stats.movingVoxels,
+                    ping: stats.network?.ping || 0
+                });
+                
+                // Keep only last 60 seconds of data
+                performanceLog = performanceLog.filter(entry => 
+                    Date.now() - entry.time < 60000
+                );
+            }
+        }, 1000);
+
+        // Expose performance data for debugging
+        window.getPerformanceLog = () => performanceLog;
+
+        console.log('📱 Client page loaded, waiting for game initialization...');
+    </script>
+</body>
+</html>

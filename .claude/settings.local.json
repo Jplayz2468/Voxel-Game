@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node server.js)",
+      "Bash(timeout:*)",
+      "Bash(node:*)",
+      "Bash(python:*)",
+      "Bash(taskkill:*)"
+    ],
+    "defaultMode": "acceptEdits"
+  }
+}
