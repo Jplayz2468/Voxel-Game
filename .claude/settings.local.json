@@ -5,7 +5,8 @@
       "Bash(timeout:*)",
       "Bash(node:*)",
       "Bash(python:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(pip install:*)"
     ],
     "defaultMode": "acceptEdits"
   }
