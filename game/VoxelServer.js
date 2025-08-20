@@ -24,7 +24,7 @@ export class VoxelServer {
         
         // Pre-initialize chunks for fast loading
         if (this.useChunkedMesh) {
-            console.log('üèóÔ∏è Pre-initializing chunk system...');
+            console.log('ó Pre-initializing chunk system...');
             this.chunkedMeshGenerator.initializeAllChunks(this.world);
         }
         
@@ -61,7 +61,7 @@ export class VoxelServer {
             playerVoxels: 0
         };
 
-        console.log('üñ•Ô∏è Multiplayer Voxel Server initialized - PLAYERS EXCLUDED FROM OWN MESH');
+        console.log('• Multiplayer Voxel Server initialized - PLAYERS EXCLUDED FROM OWN MESH');
     }
 
     /**
@@ -76,7 +76,7 @@ export class VoxelServer {
         this.players.set(playerId, player);
         this.clients.set(ws, { playerId, player });
 
-        console.log(`üë• Player ${playerId} connected (${this.players.size} total players)`);
+        console.log(`• Player ${playerId} connected (${this.players.size} total players)`);
 
         // Send player their ID and initial game state
         this.sendToClient(ws, 'playerAssigned', { playerId });
@@ -99,7 +99,7 @@ export class VoxelServer {
             this.players.delete(playerId);
             this.clients.delete(ws);
             this.clientsInitialized.delete(playerId); // Clean up initialization tracking
-            console.log(`üë• Player ${playerId} disconnected (${this.players.size} total players)`);
+            console.log(`• Player ${playerId} disconnected (${this.players.size} total players)`);
             
             // Mark mesh for update since a player left
             this.meshNeedsUpdate = true;
@@ -193,7 +193,7 @@ export class VoxelServer {
         const projectile = new MovingVoxel(spawnPos, dir, true, throwerId);
         this.movingVoxels.push(projectile);
 
-        console.log(`üéØ Projectile spawned by ${throwerId || 'unknown'}! ID: ${projectile.id}, Total: ${this.movingVoxels.length}`);
+        console.log(`Ø Projectile spawned by ${throwerId || 'unknown'}! ID: ${projectile.id}, Total: ${this.movingVoxels.length}`);
     }
 
     /**
@@ -225,7 +225,7 @@ export class VoxelServer {
         };
         
         update();
-        console.log(`üîÑ Multiplayer physics loop started at ${SERVER_TICK_RATE}Hz`);
+        console.log(`Ñ Multiplayer physics loop started at ${SERVER_TICK_RATE}Hz`);
     }
 
     /**
@@ -278,7 +278,7 @@ export class VoxelServer {
             const result = voxel.update(dt, this.movingVoxels, this);
 
             if (result === 'settled') {
-                console.log(`üîÑ Voxel settled and removed! ID: ${voxel.id}, Remaining: ${this.movingVoxels.length - 1}`);
+                console.log(`Ñ Voxel settled and removed! ID: ${voxel.id}, Remaining: ${this.movingVoxels.length - 1}`);
                 this.movingVoxels.splice(i, 1);
             }
         }
@@ -336,7 +336,7 @@ export class VoxelServer {
         // Send debug info
         this.sendToClient(ws, 'debugUpdate', this.debugInfo);
 
-        console.log(`üì§ Sent initial state to ${excludePlayerId}: ${meshData.vertices.length/3} vertices (EXCLUDED OWN PLAYER)`);
+        console.log(`§ Sent initial state to ${excludePlayerId}: ${meshData.vertices.length/3} vertices (EXCLUDED OWN PLAYER)`);
     }
 
     /**
@@ -363,7 +363,7 @@ export class VoxelServer {
 
         // Always send moving voxels updates (projectiles, debris)
         if (allVoxels.length > 0) {
-            console.log(`üì§ Sending ${allVoxels.length} moving voxels to clients`);
+            console.log(`§ Sending ${allVoxels.length} moving voxels to clients`);
             this.broadcastToClients('voxelsUpdate', { allVoxels: allVoxels });
         }
 
@@ -437,7 +437,7 @@ export class VoxelServer {
         this.totalFrameCount = (this.totalFrameCount || 0) + 1;
         
         if (this.totalFrameCount % DEBUG.LOG_FRAME_TIMING === 0) {
-            console.log(`üñ•Ô∏è Frame timing: Total=${totalFrameTime.toFixed(2)}ms, Physics=${physicsTime.toFixed(2)}ms, Updates=${updateTime.toFixed(2)}ms, Clients=${this.clients.size}, PlayerVoxels=${this.debugInfo.playerVoxels}, MovingVoxels=${this.debugInfo.activeVoxels}`);
+            console.log(`• Frame timing: Total=${totalFrameTime.toFixed(2)}ms, Physics=${physicsTime.toFixed(2)}ms, Updates=${updateTime.toFixed(2)}ms, Clients=${this.clients.size}, PlayerVoxels=${this.debugInfo.playerVoxels}, MovingVoxels=${this.debugInfo.activeVoxels}`);
         }
     }
 
@@ -445,7 +445,7 @@ export class VoxelServer {
         this.frameCount = (this.frameCount || 0) + 1;
         
         if (this.frameCount % DEBUG.LOG_FRAME_TIMING === 0) {
-            console.log(`‚è±Ô∏è Physics timing: Total=${totalTime.toFixed(2)}ms, Players=${playerTime.toFixed(2)}ms, Voxels=${voxelTime.toFixed(2)}ms, Terrain=${terrainTime.toFixed(2)}ms, PlayerVoxels=${this.debugInfo.playerVoxels}`);
+            console.log(` Physics timing: Total=${totalTime.toFixed(2)}ms, Players=${playerTime.toFixed(2)}ms, Voxels=${voxelTime.toFixed(2)}ms, Terrain=${terrainTime.toFixed(2)}ms, PlayerVoxels=${this.debugInfo.playerVoxels}`);
         }
     }
 
@@ -453,7 +453,7 @@ export class VoxelServer {
         this.sendFrameCount = (this.sendFrameCount || 0) + 1;
         
         if (this.sendFrameCount % DEBUG.LOG_FRAME_TIMING === 0) {
-            console.log(`üì° Send timing: Total=${totalTime.toFixed(2)}ms, IndividualMesh=${meshTime.toFixed(2)}ms, PlayerVoxels=${this.debugInfo.playerVoxels}, MovingVoxels=${voxelCount}`);
+            console.log(`° Send timing: Total=${totalTime.toFixed(2)}ms, IndividualMesh=${meshTime.toFixed(2)}ms, PlayerVoxels=${this.debugInfo.playerVoxels}, MovingVoxels=${voxelCount}`);
         }
     }
 
@@ -467,7 +467,7 @@ export class VoxelServer {
         
         // Always send updates for player changes (join/leave)
         if (playerCountChanged) {
-            console.log(`üë• Player count changed: ${this.lastPlayerCount} ‚Üí ${this.players.size}, sending immediate mesh update`);
+            console.log(`• Player count changed: ${this.lastPlayerCount} ‚Üí ${this.players.size}, sending immediate mesh update`);
             this.sendMeshUpdatesAsync(allVoxels);
             this.meshNeedsUpdate = false;
             this.lastPlayerCount = this.players.size;
@@ -482,7 +482,7 @@ export class VoxelServer {
             
             if (shouldUpdate) {
                 const reason = this.getUpdateReason(timeSinceLastUpdate, hasActiveDebris);
-                console.log(`üß± Sending mesh update: ${reason} (debris updates: ${this.debrisUpdateCount}/${MAX_DEBRIS_UPDATES})`);
+                console.log(`± Sending mesh update: ${reason} (debris updates: ${this.debrisUpdateCount}/${MAX_DEBRIS_UPDATES})`);
                 
                 this.sendMeshUpdatesAsync(allVoxels);
                 this.meshNeedsUpdate = false;
@@ -546,7 +546,7 @@ export class VoxelServer {
         // Schedule final update when debris should be settled
         this.debrisSettleTimer = setTimeout(() => {
             const currentTime = Date.now();
-            console.log(`‚è∞ Debris settle timer fired, sending final mesh update (${DEBRIS_SETTLE_TIME}ms after last debris activity)`);
+            console.log(` Debris settle timer fired, sending final mesh update (${DEBRIS_SETTLE_TIME}ms after last debris activity)`);
             
             // Get current moving voxels
             const currentVoxels = this.movingVoxels.map(v => ({
@@ -570,7 +570,7 @@ export class VoxelServer {
      * Sends mesh updates to all clients asynchronously (parallel, non-blocking)
      */
     sendMeshUpdatesAsync(allVoxels) {
-        console.log(`üß± Sending batched mesh update to ${this.clients.size} clients`);
+        console.log(`± Sending batched mesh update to ${this.clients.size} clients`);
         
         // Send each client's mesh update in parallel using setImmediate
         for (const [ws, clientData] of this.clients.entries()) {
@@ -603,9 +603,9 @@ export class VoxelServer {
                     
                     const chunkInfo = meshData.chunkStats ? ` (${meshData.chunkStats.dirtyChunks}/${meshData.chunkStats.totalChunks} chunks updated${meshData.chunkStats.deltaMode ? ', DELTA' : ', FULL'})` : '';
                     const updateType = isDeltaUpdate ? 'CHUNK UPDATE' : 'FULL MESH';
-                    console.log(`üì§ ${updateType} sent to ${clientData.playerId}: ${meshData.vertices.length/3} vertices (${meshTime.toFixed(1)}ms)${chunkInfo}`);
+                    console.log(`§ ${updateType} sent to ${clientData.playerId}: ${meshData.vertices.length/3} vertices (${meshTime.toFixed(1)}ms)${chunkInfo}`);
                 } catch (error) {
-                    console.error(`‚ùå Error sending mesh to ${clientData.playerId}:`, error);
+                    console.error(` Error sending mesh to ${clientData.playerId}:`, error);
                 }
             });
         }
@@ -630,7 +630,7 @@ export class VoxelServer {
      * Gracefully shuts down the server
      */
     shutdown() {
-        console.log('üõë Shutting down server...');
+        console.log('ë Shutting down server...');
         
         // Notify all clients
         this.broadcastToClients('serverShutdown', { 
@@ -642,6 +642,6 @@ export class VoxelServer {
             ws.close();
         }
 
-        console.log('‚úÖ Server shutdown complete');
+        console.log(' Server shutdown complete');
     }
 }

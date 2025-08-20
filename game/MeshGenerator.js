@@ -21,7 +21,7 @@ export class MeshGenerator {
         // Generate player template meshes (at origin positions)
         const playerMeshes = this.generatePlayerTemplates(players, excludePlayerId);
 
-        console.log(`✅ Mesh generated for ${excludePlayerId}: ${terrainVertices.length/3} terrain vertices, ${playerMeshes.length} players`);
+        console.log(`Mesh generated for ${excludePlayerId}: ${terrainVertices.length/3} terrain vertices, ${playerMeshes.length} players`);
 
         return { 
             vertices: terrainVertices, 
@@ -104,17 +104,17 @@ export class MeshGenerator {
      * Each player appears as an orange voxel structure
      */
     generatePlayerMeshes(players, excludePlayerId, vertices, normals, colors, indices) {
-        console.log(`🧱 Adding ${players.size} players to mesh with greedy meshing (excluding ${excludePlayerId})...`);
+        console.log(`Adding ${players.size} players to mesh with greedy meshing (excluding ${excludePlayerId})...`);
         
         let totalPlayerVoxelsAdded = 0;
 
         for (const [playerId, player] of players.entries()) {
             if (playerId === excludePlayerId) {
-                console.log(`🚫 EXCLUDING own player ${playerId} from mesh generation`);
+                console.log(`EXCLUDING own player ${playerId} from mesh generation`);
                 continue;
             }
 
-            console.log(`🎨 Greedy meshing player ${playerId} with ${player.bodyVoxels.length} voxels`);
+            console.log(`Greedy meshing player ${playerId} with ${player.bodyVoxels.length} voxels`);
             
             const playerMesh = this.generateGreedyPlayerMesh(player);
             
@@ -134,7 +134,7 @@ export class MeshGenerator {
             totalPlayerVoxelsAdded += playerMesh.vertices.length / 3;
         }
 
-        console.log(`✅ Added ${totalPlayerVoxelsAdded} player vertices with greedy meshing`);
+        console.log(`Added ${totalPlayerVoxelsAdded} player vertices with greedy meshing`);
     }
 
     /**
@@ -146,7 +146,7 @@ export class MeshGenerator {
         
         for (const [playerId, player] of players.entries()) {
             if (playerId === excludePlayerId) {
-                console.log(`🚫 EXCLUDING own player ${playerId} from template generation`);
+                console.log(`EXCLUDING own player ${playerId} from template generation`);
                 continue;
             }
 
@@ -224,7 +224,7 @@ export class MeshGenerator {
         // Generate mesh using greedy meshing
         const mesh = this.greedyMeshPlayerGrid(grid, bounds);
         
-        console.log(`🏗️ Player mesh: ${player.bodyVoxels.length} voxels → ${mesh.vertices.length/3} vertices (${mesh.vertices.length/12} faces) - ${((1 - mesh.vertices.length/12/(player.bodyVoxels.length * 6)) * 100).toFixed(1)}% faces removed`);
+        console.log(`Player mesh: ${player.bodyVoxels.length} voxels -> ${mesh.vertices.length/3} vertices (${mesh.vertices.length/12} faces) - ${((1 - mesh.vertices.length/12/(player.bodyVoxels.length * 6)) * 100).toFixed(1)}% faces removed`);
         
         return mesh;
     }
@@ -471,7 +471,7 @@ export class MeshGenerator {
 
         const originalCount = vertices.length / 3;
         const optimizedCount = newVertices.length / 3;
-        console.log(`🔧 Mesh optimized: ${originalCount} → ${optimizedCount} vertices (${((1-optimizedCount/originalCount)*100).toFixed(1)}% reduction)`);
+        console.log(`Mesh optimized: ${originalCount} -> ${optimizedCount} vertices (${((1-optimizedCount/originalCount)*100).toFixed(1)}% reduction`);
 
         return {
             vertices: newVertices,

@@ -210,7 +210,7 @@ export class MovingVoxel {
 
         // If this is a fast projectile, knock the player voxel off
         if (speed > 10 && this.isProjectile && !this.hasCollided) {
-            console.log(`💥 Projectile hit player voxel! Speed=${speed.toFixed(1)}, ProjectilePos=[${this.pos[0].toFixed(1)}, ${this.pos[1].toFixed(1)}, ${this.pos[2].toFixed(1)}], PlayerVoxelPos=[${playerVoxel.pos[0].toFixed(1)}, ${playerVoxel.pos[1].toFixed(1)}, ${playerVoxel.pos[2].toFixed(1)}]`);
+            console.log(`Projectile hit player voxel! Speed=${speed.toFixed(1)}, ProjectilePos=[${this.pos[0].toFixed(1)}, ${this.pos[1].toFixed(1)}, ${this.pos[2].toFixed(1)}], PlayerVoxelPos=[${playerVoxel.pos[0].toFixed(1)}, ${playerVoxel.pos[1].toFixed(1)}, ${playerVoxel.pos[2].toFixed(1)}]`);
 
             // SMART EJECTION: Calculate safe exit point and realistic physics BEFORE removing from player
             const owningPlayer = this.findPlayerOwningVoxel(playerVoxel, server);
@@ -256,7 +256,7 @@ export class MovingVoxel {
                 ejectionDir[2] * baseEjectionSpeed + (Math.random() - 0.5) * randomVariation
             ];
             
-            console.log(`🚀 Smart ejection: PlayerCenter=[${playerCenter[0].toFixed(1)}, ${playerCenter[1].toFixed(1)}, ${playerCenter[2].toFixed(1)}], NewPos=[${playerVoxel.pos[0].toFixed(1)}, ${playerVoxel.pos[1].toFixed(1)}, ${playerVoxel.pos[2].toFixed(1)}], Vel=[${playerVoxel.vel[0].toFixed(1)}, ${playerVoxel.vel[1].toFixed(1)}, ${playerVoxel.vel[2].toFixed(1)}]`);
+            console.log(`Smart ejection: PlayerCenter=[${playerCenter[0].toFixed(1)}, ${playerCenter[1].toFixed(1)}, ${playerCenter[2].toFixed(1)}], NewPos=[${playerVoxel.pos[0].toFixed(1)}, ${playerVoxel.pos[1].toFixed(1)}, ${playerVoxel.pos[2].toFixed(1)}], Vel=[${playerVoxel.vel[0].toFixed(1)}, ${playerVoxel.vel[1].toFixed(1)}, ${playerVoxel.vel[2].toFixed(1)}]`);
 
             // Add it to the moving voxels list
             server.movingVoxels.push(playerVoxel);
@@ -409,7 +409,7 @@ export class MovingVoxel {
                 if (this.checkVoxelToVoxelCollision(playerVoxel)) {
                     // Debris hitting player - just bounce off, don't destroy
                     this.handleVoxelCollision(playerVoxel);
-                    console.log(`🏀 Debris bounced off player voxel`);
+                    console.log(`Debris bounced off player voxel`);
                 }
             }
         }
@@ -448,7 +448,7 @@ export class MovingVoxel {
                 const minDistance = this.size + playerVoxel.size;
                 
                 if (this.checkVoxelToVoxelCollision(playerVoxel)) {
-                    console.log(`🎯 Collision detected! Distance=${distance.toFixed(2)}, MinDistance=${minDistance.toFixed(2)}, ProjectileSpeed=${Math.sqrt(this.vel[0]**2 + this.vel[1]**2 + this.vel[2]**2).toFixed(1)}`);
+                    console.log(`Collision detected! Distance=${distance.toFixed(2)}, MinDistance=${minDistance.toFixed(2)}, ProjectileSpeed=${Math.sqrt(this.vel[0]**2 + this.vel[1]**2 + this.vel[2]**2).toFixed(1)}`);
                     
                     const wasRemoved = this.handlePlayerVoxelCollision(playerVoxel, server);
                     if (wasRemoved) {
@@ -567,7 +567,7 @@ export class MovingVoxel {
                                 
                                 // Mark chunk as dirty for chunked mesh system
                                 if (server.useChunkedMesh && server.chunkedMeshGenerator) {
-                                    console.log(`💥 Terrain destroyed at (${blockPos[0]}, ${blockPos[1]}, ${blockPos[2]}) - marking chunk dirty`);
+                                    console.log(`Terrain destroyed at (${blockPos[0]}, ${blockPos[1]}, ${blockPos[2]}) - marking chunk dirty`);
                                     server.chunkedMeshGenerator.markPositionDirty(blockPos[0], blockPos[2]);
                                 }
                                 dislodged++;
@@ -578,7 +578,7 @@ export class MovingVoxel {
             }
         }
 
-        console.log(`💥 Impact: ${dislodged} blocks dislodged`);
+        console.log(`Impact: ${dislodged} blocks dislodged`);
     }
 
     /**
@@ -597,10 +597,10 @@ export class MovingVoxel {
             
             // Mark chunk as dirty for chunked mesh system
             if (server.useChunkedMesh && server.chunkedMeshGenerator) {
-                console.log(`🏗️ Terrain settled at (${gridX}, ${gridY}, ${gridZ}) - marking chunk dirty`);
+                console.log(`Terrain settled at (${gridX}, ${gridY}, ${gridZ}) - marking chunk dirty`);
                 server.chunkedMeshGenerator.markPositionDirty(gridX, gridZ);
             }
-            console.log(`🔄 Voxel settled at ${gridX},${gridY},${gridZ}`);
+            console.log(`Voxel settled at ${gridX},${gridY},${gridZ}`);
             return 'settled';
         }
         return 'continue';

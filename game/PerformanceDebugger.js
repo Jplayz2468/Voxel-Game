@@ -11,7 +11,7 @@ export class PerformanceDebugger {
         this.createOverlay();
         this.setupKeyboardHandler();
         
-        console.log('🔍 Performance debugger initialized (Press P to toggle)');
+        console.log('Performance debugger initialized (Press P to toggle)');
     }
 
     /**
@@ -51,7 +51,7 @@ export class PerformanceDebugger {
             border-bottom: 1px solid #00ff00;
             padding-bottom: 5px;
         `;
-        header.textContent = '🔍 TERRAIN UPDATE PERFORMANCE DEBUGGER';
+        header.textContent = 'TERRAIN UPDATE PERFORMANCE DEBUGGER';
         this.overlay.appendChild(header);
 
         // Create content area
@@ -81,10 +81,10 @@ export class PerformanceDebugger {
         this.overlay.style.display = this.isActive ? 'block' : 'none';
         
         if (this.isActive) {
-            console.log('🔍 Performance debugger ENABLED');
+            console.log('Performance debugger ENABLED');
             this.updateDisplay();
         } else {
-            console.log('🔍 Performance debugger DISABLED');
+            console.log('Performance debugger DISABLED');
         }
     }
 
@@ -104,7 +104,7 @@ export class PerformanceDebugger {
             completed: false
         };
 
-        console.log(`🎯 Starting terrain update timing ${updateId}`);
+        console.log(`Starting terrain update timing ${updateId}`);
         this.updateDisplay();
         return updateId;
     }
@@ -118,7 +118,7 @@ export class PerformanceDebugger {
         }
 
         const stepStartTime = performance.now();
-        console.log(`⏱️ Starting step: ${stepName}`);
+        console.log(`Starting step: ${stepName}`);
         
         try {
             const result = fn();
@@ -159,7 +159,7 @@ export class PerformanceDebugger {
             this.currentUpdate.stepOrder.push(stepName);
         }
 
-        console.log(`✅ Completed step: ${stepName} (${stepTime.toFixed(2)}ms)`);
+        console.log(`Completed step: ${stepName} (${stepTime.toFixed(2)}ms)`);
         this.updateDisplay();
     }
 
@@ -180,7 +180,7 @@ export class PerformanceDebugger {
             this.recentUpdates.pop();
         }
 
-        console.log(`🏁 Terrain update ${updateId} completed in ${this.currentUpdate.totalTime.toFixed(2)}ms`);
+        console.log(`Terrain update ${updateId} completed in ${this.currentUpdate.totalTime.toFixed(2)}ms`);
         
         this.currentUpdate = null;
         this.updateDisplay();
@@ -227,7 +227,7 @@ export class PerformanceDebugger {
         
         let html = `
             <div style="margin-bottom: 15px;">
-                <div style="color: #ffff00; font-weight: bold;">🔄 CURRENT UPDATE (${elapsed.toFixed(0)}ms elapsed)</div>
+                <div style="color: #ffff00; font-weight: bold;">CURRENT UPDATE (${elapsed.toFixed(0)}ms elapsed)</div>
         `;
 
         if (update.stepOrder.length > 0) {
@@ -243,16 +243,16 @@ export class PerformanceDebugger {
                             index === 1 ? '#ffaa44' : // Second slowest in orange
                             '#00ff00'; // Others in green
                 
-                const icon = step.error ? '❌' : 
-                           index === 0 ? '🐌' : // Slowest
-                           index === 1 ? '⚠️' : '✅'; // Second slowest
+                const icon = step.error ? 'ERROR' : 
+                           index === 0 ? 'SLOW' : // Slowest
+                           index === 1 ? 'WARN' : 'OK'; // Second slowest
                 
                 // Special handling for delta updates
                 let stepDisplay = step.name;
                 if (step.name.includes('Delta')) {
-                    stepDisplay += ' 🔄'; // Delta indicator
+                    stepDisplay += ' DELTA'; // Delta indicator
                 } else if (step.name.includes('Full')) {
-                    stepDisplay += ' 📦'; // Full upload indicator
+                    stepDisplay += ' FULL'; // Full upload indicator
                 }
                 
                 html += `
@@ -285,7 +285,7 @@ export class PerformanceDebugger {
     renderRecentUpdates() {
         let html = `
             <div style="margin-top: 15px; border-top: 1px solid #444; padding-top: 10px;">
-                <div style="color: #ffff00; font-weight: bold; margin-bottom: 8px;">📊 RECENT UPDATES</div>
+                <div style="color: #ffff00; font-weight: bold; margin-bottom: 8px;">RECENT UPDATES</div>
         `;
 
         // Show average times
@@ -308,7 +308,7 @@ export class PerformanceDebugger {
             .sort((a, b) => b[1] - a[1])[0];
 
         if (mostCommonBottleneck) {
-            html += `<div style="color: #ff6666; margin-top: 5px;">🎯 Main Bottleneck: ${mostCommonBottleneck[0]} (${mostCommonBottleneck[1]}/${this.recentUpdates.length} times)</div>`;
+            html += `<div style="color: #ff6666; margin-top: 5px;">Main Bottleneck: ${mostCommonBottleneck[0]} (${mostCommonBottleneck[1]}/${this.recentUpdates.length} times)</div>`;
         }
 
         // Show recent update list
@@ -338,6 +338,6 @@ export class PerformanceDebugger {
         if (this.overlay && this.overlay.parentNode) {
             this.overlay.parentNode.removeChild(this.overlay);
         }
-        console.log('🔍 Performance debugger cleaned up');
+        console.log('Performance debugger cleaned up');
     }
 }

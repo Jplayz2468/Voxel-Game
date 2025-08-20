@@ -57,7 +57,7 @@ export class VoxelClient {
         this.setupNetworkHandlers();
         this.setupInputHandlers();
         
-        console.log('üöÄ Voxel client initialized');
+        console.log('Ä Voxel client initialized');
     }
 
     /**
@@ -68,7 +68,7 @@ export class VoxelClient {
         this.networkClient.onMessage('playerAssigned', (data) => {
             this.myPlayerId = data.playerId;
             this.networkClient.setPlayerId(data.playerId);
-            console.log(`üë§ Assigned player ID: ${this.myPlayerId}`);
+            console.log(`§ Assigned player ID: ${this.myPlayerId}`);
         });
 
         // Initial render update (terrain mesh + moving voxels) - sent once on connect
@@ -84,7 +84,7 @@ export class VoxelClient {
             // Add moving voxels to interpolation system
             this.interpolation.addVoxelSnapshot(now, data.allVoxels || []);
             
-            console.log(`üé® Received initial mesh: ${data.vertices.length/3} terrain vertices, ${(data.playerMeshes||[]).length} player templates, ${(data.allVoxels||[]).length} moving voxels`);
+            console.log(`® Received initial mesh: ${data.vertices.length/3} terrain vertices, ${(data.playerMeshes||[]).length} player templates, ${(data.allVoxels||[]).length} moving voxels`);
         });
         
         // Mesh updates (when players join/leave or voxels are destroyed)
@@ -92,7 +92,7 @@ export class VoxelClient {
             const messageStartTime = performance.now();
             const now = performance.now();
             
-            console.log(`üéØ TERRAIN UPDATE TRIGGERED: ${data.vertices.length/3} vertices, ${(data.indices||[]).length/3} triangles`);
+            console.log(`Ø TERRAIN UPDATE TRIGGERED: ${data.vertices.length/3} vertices, ${(data.indices||[]).length/3} triangles`);
             
             // Update terrain mesh (this is where the lag likely occurs)
             const meshUpdateStartTime = performance.now();
@@ -111,7 +111,7 @@ export class VoxelClient {
             
             const totalMessageTime = performance.now() - messageStartTime;
             
-            console.log(`üß± Mesh update complete: MeshUpdate=${meshUpdateTime.toFixed(2)}ms, Templates=${templateTime.toFixed(2)}ms, Voxels=${voxelTime.toFixed(2)}ms, Total=${totalMessageTime.toFixed(2)}ms`);
+            console.log(`± Mesh update complete: MeshUpdate=${meshUpdateTime.toFixed(2)}ms, Templates=${templateTime.toFixed(2)}ms, Voxels=${voxelTime.toFixed(2)}ms, Total=${totalMessageTime.toFixed(2)}ms`);
             
             // Store timing for debug display
             this.lastNetworkTiming.meshUpdate = {
@@ -125,7 +125,7 @@ export class VoxelClient {
             
             // Log warning if this was slow
             if (totalMessageTime > 16) { // More than one frame at 60fps
-                console.warn(`‚ö†Ô∏è SLOW TERRAIN UPDATE: ${totalMessageTime.toFixed(2)}ms (>16ms frame budget) - Check performance debugger!`);
+                console.warn(` SLOW TERRAIN UPDATE: ${totalMessageTime.toFixed(2)}ms (>16ms frame budget) - Check performance debugger!`);
             }
         });
         
@@ -134,7 +134,7 @@ export class VoxelClient {
             const messageStartTime = performance.now();
             const now = performance.now();
             
-            console.log(`üîÑ CHUNK UPDATE TRIGGERED: ${data.deltaChunks ? data.deltaChunks.length : 0} chunks, ${data.vertices.length/3} vertices total`);
+            console.log(`Ñ CHUNK UPDATE TRIGGERED: ${data.deltaChunks ? data.deltaChunks.length : 0} chunks, ${data.vertices.length/3} vertices total`);
             
             // Update only the changed chunks, preserving existing terrain
             const chunkUpdateStartTime = performance.now();
@@ -153,7 +153,7 @@ export class VoxelClient {
             
             const totalMessageTime = performance.now() - messageStartTime;
             
-            console.log(`üîÑ Chunk update complete: ChunkUpdate=${chunkUpdateTime.toFixed(2)}ms, Templates=${templateTime.toFixed(2)}ms, Voxels=${voxelTime.toFixed(2)}ms, Total=${totalMessageTime.toFixed(2)}ms`);
+            console.log(`Ñ Chunk update complete: ChunkUpdate=${chunkUpdateTime.toFixed(2)}ms, Templates=${templateTime.toFixed(2)}ms, Voxels=${voxelTime.toFixed(2)}ms, Total=${totalMessageTime.toFixed(2)}ms`);
             
             // Get detailed renderer timing
             const rendererTiming = this.renderer.lastChunkUpdateTiming;
@@ -171,7 +171,7 @@ export class VoxelClient {
             
             // This should be much faster than full mesh updates
             if (totalMessageTime > 8) {
-                console.warn(`‚ö†Ô∏è SLOW CHUNK UPDATE: ${totalMessageTime.toFixed(2)}ms (should be <8ms)`);
+                console.warn(` SLOW CHUNK UPDATE: ${totalMessageTime.toFixed(2)}ms (should be <8ms)`);
             }
         });
         
@@ -180,13 +180,13 @@ export class VoxelClient {
             const startTime = performance.now();
             const now = performance.now();
             
-            console.log(`üì• Received ${(data.allVoxels || []).length} moving voxels`);
+            console.log(`• Received ${(data.allVoxels || []).length} moving voxels`);
             
             // Add moving voxels to interpolation system
             this.interpolation.addVoxelSnapshot(now, data.allVoxels || []);
             
             const processingTime = performance.now() - startTime;
-            console.log(`‚è±Ô∏è Voxel update processing: ${processingTime.toFixed(2)}ms`);
+            console.log(` Voxel update processing: ${processingTime.toFixed(2)}ms`);
         });
 
         // Player position updates
@@ -256,7 +256,7 @@ export class VoxelClient {
      * Starts the main game loop
      */
     start() {
-        console.log('üéÆ Starting game loop...');
+        console.log('Æ Starting game loop...');
         this.gameLoop();
     }
 
@@ -286,7 +286,7 @@ export class VoxelClient {
 
         // Debug: Log when there are moving voxels
         if (interpolatedVoxels.length > 0) {
-            console.log(`üéØ Frame has ${interpolatedVoxels.length} moving voxels to render`);
+            console.log(`Ø Frame has ${interpolatedVoxels.length} moving voxels to render`);
         }
 
         // Render the scene
@@ -297,7 +297,7 @@ export class VoxelClient {
 
         // Debug: Log render performance when there are moving voxels
         if (interpolatedVoxels.length > 0) {
-            console.log(`üé® Render time with ${interpolatedVoxels.length} voxels: ${renderTime.toFixed(2)}ms`);
+            console.log(`® Render time with ${interpolatedVoxels.length} voxels: ${renderTime.toFixed(2)}ms`);
         }
 
         // Render 2D dots if enabled
@@ -375,7 +375,7 @@ export class VoxelClient {
         
         if (this.timingFrameCount % 60 === 0) {
             const timing = this.lastFrameTiming;
-            console.log(`üé¨ Client timing: Total=${timing.total.toFixed(2)}ms, Camera=${timing.camera.toFixed(2)}ms, VoxelInterp=${timing.voxelInterpolation.toFixed(2)}ms, Render=${timing.render.toFixed(2)}ms, MovingVoxels=${timing.voxelCount}`);
+            console.log(`¨ Client timing: Total=${timing.total.toFixed(2)}ms, Camera=${timing.camera.toFixed(2)}ms, VoxelInterp=${timing.voxelInterpolation.toFixed(2)}ms, Render=${timing.render.toFixed(2)}ms, MovingVoxels=${timing.voxelCount}`);
         }
     }
 
@@ -397,7 +397,7 @@ export class VoxelClient {
 
         const mode = settings.smoothMode ? 'SMOOTH' : 'RAW';
         const colorMode = settings.colorMode ? 'COLORED' : 'GRAY';
-        const serverStatus = connectionStats.connected ? 'üü¢ CONNECTED' : 'üî¥ DISCONNECTED';
+        const serverStatus = connectionStats.connected ? '¢ CONNECTED' : '¥ DISCONNECTED';
 
         // Find slowest process
         const timing = this.lastFrameTiming;
@@ -416,15 +416,15 @@ MyID: ${this.myPlayerId || 'unknown'}<br>
 Players: ${this.playerPositions.size} with positions, HOLLOW ORANGE SHELLS (exterior faces only)<br>
 Moving Objects: ${interpolatedVoxels.length} total (${projectileCount} projectiles, ${debrisCount} debris)<br>
 Interpolation: ${interpolationStats.voxelSnapshots} voxel snapshots, ${interpolationStats.renderDelay}ms delay<br>
-<span style="color: yellow;">üêå BOTTLENECK: ${slowestProcess.name} = ${slowestProcess.time.toFixed(2)}ms (${Math.round((slowestProcess.time/timing.total)*100)}% of frame)</span><br>
-<span style="color: orange;">üìä FRAME BREAKDOWN: Input=${timing.input.toFixed(1)}ms, Camera=${timing.camera.toFixed(1)}ms, VoxelInterp=${timing.voxelInterpolation.toFixed(1)}ms, Render=${timing.render.toFixed(1)}ms, Dots=${timing.dots.toFixed(1)}ms, FPS=${timing.fps.toFixed(1)}ms</span><br>
+<span style="color: yellow;">å BOTTLENECK: ${slowestProcess.name} = ${slowestProcess.time.toFixed(2)}ms (${Math.round((slowestProcess.time/timing.total)*100)}% of frame)</span><br>
+<span style="color: orange;">ä FRAME BREAKDOWN: Input=${timing.input.toFixed(1)}ms, Camera=${timing.camera.toFixed(1)}ms, VoxelInterp=${timing.voxelInterpolation.toFixed(1)}ms, Render=${timing.render.toFixed(1)}ms, Dots=${timing.dots.toFixed(1)}ms, FPS=${timing.fps.toFixed(1)}ms</span><br>
 ${renderInfo}<br>
 ${networkInfo}<br>
 Visual: ${colorMode} mode, ${settings.colorMode ? 'dots ON' : 'dots OFF'}, first-person view<br>
 Ping: ${connectionStats.ping.toFixed(0)}ms, Reconnects: ${connectionStats.reconnectAttempts}<br>
 Cam: ${this.camera.smoothPos[0].toFixed(1)}, ${this.camera.smoothPos[1].toFixed(1)}, ${this.camera.smoothPos[2].toFixed(1)}<br>
 <span style="color: cyan;">T: SMOOTH/RAW | C: COLORED/GRAY</span><br>
-<span style="color: lime;">‚úÖ GREEDY MESHED: Players are hollow shells = clean first-person view!</span>`;
+<span style="color: lime;"> GREEDY MESHED: Players are hollow shells = clean first-person view!</span>`;
     }
 
     /**
@@ -432,7 +432,7 @@ Cam: ${this.camera.smoothPos[0].toFixed(1)}, ${this.camera.smoothPos[1].toFixed(
      */
     getRenderBreakdownInfo(timing) {
         if (!timing.renderBreakdown) {
-            return '<span style="color: gray;">üé® RENDER BREAKDOWN: No detailed timing available</span>';
+            return '<span style="color: gray;">® RENDER BREAKDOWN: No detailed timing available</span>';
         }
         
         const rb = timing.renderBreakdown;
@@ -440,7 +440,7 @@ Cam: ${this.camera.smoothPos[0].toFixed(1)}, ${this.camera.smoothPos[1].toFixed(
         if (rb.total > 10) color = 'red';
         else if (rb.total > 5) color = 'yellow';
         
-        return `<span style="color: ${color};">üé® RENDER BREAKDOWN: Clear=${rb.clear.toFixed(1)}ms, Camera=${rb.cameraSetup.toFixed(1)}ms, Light=${rb.lighting.toFixed(1)}ms, Terrain=${rb.terrain.toFixed(1)}ms, Players=${rb.players.toFixed(1)}ms, MovingVoxels=${rb.movingVoxels.toFixed(1)}ms (${rb.movingVoxelCount} voxels)</span>`;
+        return `<span style="color: ${color};">® RENDER BREAKDOWN: Clear=${rb.clear.toFixed(1)}ms, Camera=${rb.cameraSetup.toFixed(1)}ms, Light=${rb.lighting.toFixed(1)}ms, Terrain=${rb.terrain.toFixed(1)}ms, Players=${rb.players.toFixed(1)}ms, MovingVoxels=${rb.movingVoxels.toFixed(1)}ms (${rb.movingVoxelCount} voxels)</span>`;
     }
 
     /**
@@ -448,7 +448,7 @@ Cam: ${this.camera.smoothPos[0].toFixed(1)}, ${this.camera.smoothPos[1].toFixed(
      */
     getNetworkTimingInfo(timeSinceLastUpdate) {
         if (this.lastNetworkTiming.lastUpdateType === 'none') {
-            return '<span style="color: gray;">üì° NETWORK: No recent terrain updates</span>';
+            return '<span style="color: gray;">° NETWORK: No recent terrain updates</span>';
         }
         
         const updateType = this.lastNetworkTiming.lastUpdateType;
@@ -460,7 +460,7 @@ Cam: ${this.camera.smoothPos[0].toFixed(1)}, ${this.camera.smoothPos[1].toFixed(
         else if (timing.total > 16) color = 'yellow';
         
         if (updateType === 'meshUpdate') {
-            return `<span style="color: ${color};">üì° MESH UPDATE (${age}): Total=${timing.total.toFixed(1)}ms | MeshUpdate=${timing.meshUpdate.toFixed(1)}ms, Templates=${timing.templates.toFixed(1)}ms, Voxels=${timing.voxels.toFixed(1)}ms</span>`;
+            return `<span style="color: ${color};">° MESH UPDATE (${age}): Total=${timing.total.toFixed(1)}ms | MeshUpdate=${timing.meshUpdate.toFixed(1)}ms, Templates=${timing.templates.toFixed(1)}ms, Voxels=${timing.voxels.toFixed(1)}ms</span>`;
         } else {
             // Show detailed chunk update breakdown
             let detailStr = `Total=${timing.total.toFixed(1)}ms | ChunkUpdate=${timing.chunkUpdate.toFixed(1)}ms, Templates=${timing.templates.toFixed(1)}ms, Voxels=${timing.voxels.toFixed(1)}ms`;
@@ -488,7 +488,7 @@ Cam: ${this.camera.smoothPos[0].toFixed(1)}, ${this.camera.smoothPos[1].toFixed(
                 }
             }
             
-            return `<span style="color: ${color};">üì° CHUNK UPDATE (${age}): ${detailStr}</span>`;
+            return `<span style="color: ${color};">° CHUNK UPDATE (${age}): ${detailStr}</span>`;
         }
     }
 
@@ -518,10 +518,10 @@ Cam: ${this.camera.smoothPos[0].toFixed(1)}, ${this.camera.smoothPos[1].toFixed(
         if (!statusDiv) return;
 
         if (connected) {
-            statusDiv.innerHTML = 'üü¢ Connected to server';
+            statusDiv.innerHTML = '¢ Connected to server';
             statusDiv.style.color = 'lime';
         } else {
-            statusDiv.innerHTML = 'üî¥ Disconnected from server';
+            statusDiv.innerHTML = '¥ Disconnected from server';
             statusDiv.style.color = 'red';
         }
     }
@@ -534,7 +534,7 @@ Cam: ${this.camera.smoothPos[0].toFixed(1)}, ${this.camera.smoothPos[1].toFixed(
         if (!pingDiv) return;
 
         const color = ping < 50 ? 'lime' : ping < 100 ? 'yellow' : 'red';
-        pingDiv.innerHTML = `üì° Ping: ${ping.toFixed(0)}ms`;
+        pingDiv.innerHTML = `° Ping: ${ping.toFixed(0)}ms`;
         pingDiv.style.color = color;
     }
 
@@ -586,14 +586,14 @@ Cam: ${this.camera.smoothPos[0].toFixed(1)}, ${this.camera.smoothPos[1].toFixed(
             });
         }
         
-        console.log(`üíæ Updated ${playerMeshes.length} player mesh templates`);
+        console.log(`æ Updated ${playerMeshes.length} player mesh templates`);
     }
 
     /**
      * Cleanup function
      */
     cleanup() {
-        console.log('üßπ Cleaning up voxel client...');
+        console.log('π Cleaning up voxel client...');
         
         this.networkClient.disconnect();
         this.renderer.cleanup();
@@ -601,6 +601,6 @@ Cam: ${this.camera.smoothPos[0].toFixed(1)}, ${this.camera.smoothPos[1].toFixed(
         this.interpolation.clear();
         this.performanceDebugger.cleanup();
         
-        console.log('‚úÖ Client cleanup complete');
+        console.log(' Client cleanup complete');
     }
 }

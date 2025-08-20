@@ -22,20 +22,20 @@ export class NetworkClient {
         this.maxReconnectAttempts = 5;
         this.reconnectDelay = 2000; // 2 seconds
         
-        console.log('🌐 Network client initialized');
+        console.log('Network client initialized');
     }
 
     /**
      * Connects to the server
      */
     connect(serverUrl = 'ws://localhost:8765') {
-        console.log(`🔌 Connecting to server: ${serverUrl}`);
+        console.log(`Connecting to server: ${serverUrl}`);
         
         try {
             this.ws = new WebSocket(serverUrl);
             this.setupWebSocketHandlers();
         } catch (error) {
-            console.error('❌ Failed to create WebSocket connection:', error);
+            console.error('Failed to create WebSocket connection:', error);
             this.handleConnectionError();
         }
     }
@@ -45,7 +45,7 @@ export class NetworkClient {
      */
     setupWebSocketHandlers() {
         this.ws.onopen = () => {
-            console.log('✅ Connected to server!');
+            console.log('Connected to server!');
             this.connected = true;
             this.reconnectAttempts = 0;
             this.requestInitialState();
@@ -53,14 +53,14 @@ export class NetworkClient {
         };
 
         this.ws.onclose = (event) => {
-            console.log(`❌ Disconnected from server (code: ${event.code})`);
+            console.log(`Disconnected from server (code: ${event.code})`);
             this.connected = false;
             this.notifyConnectionChange(false);
             this.handleDisconnection();
         };
 
         this.ws.onerror = (error) => {
-            console.error('❌ WebSocket error:', error);
+            console.error('WebSocket error:', error);
             this.handleConnectionError();
         };
 
@@ -80,10 +80,10 @@ export class NetworkClient {
             if (handler) {
                 handler(message.data, message.timestamp);
             } else {
-                console.warn(`📨 Unhandled message type: ${message.type}`);
+                console.warn(`Unhandled message type: ${message.type}`);
             }
         } catch (error) {
-            console.error('❌ Error parsing message:', error);
+            console.error('Error parsing message:', error);
         }
     }
 
@@ -92,7 +92,7 @@ export class NetworkClient {
      */
     sendMessage(type, data) {
         if (!this.connected || this.ws.readyState !== WebSocket.OPEN) {
-            console.warn(`⚠️ Cannot send message '${type}': not connected`);
+            console.warn(`Cannot send message '${type}': not connected`);
             return false;
         }
 
@@ -106,7 +106,7 @@ export class NetworkClient {
             this.ws.send(message);
             return true;
         } catch (error) {
-            console.error('❌ Error sending message:', error);
+            console.error('Error sending message:', error);
             return false;
         }
     }
@@ -152,13 +152,13 @@ export class NetworkClient {
     handleDisconnection() {
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
             this.reconnectAttempts++;
-            console.log(`🔄 Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+            console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
             
             setTimeout(() => {
                 this.connect();
             }, this.reconnectDelay);
         } else {
-            console.error('💀 Max reconnection attempts reached');
+            console.error('Max reconnection attempts reached');
         }
     }
 
@@ -238,7 +238,7 @@ export class NetworkClient {
      */
     setPlayerId(playerId) {
         this.myPlayerId = playerId;
-        console.log(`👤 Player ID assigned: ${playerId}`);
+        console.log(`Player ID assigned: ${playerId}`);
     }
 
     /**
@@ -282,7 +282,7 @@ export class NetworkClient {
      */
     disconnect() {
         if (this.ws) {
-            console.log('👋 Disconnecting from server...');
+            console.log('Disconnecting from server...');
             this.connected = false;
             this.ws.close();
             this.ws = null;
@@ -304,7 +304,7 @@ export class InterpolationSystem {
         this.maxSnapshots = 10;
         this.smoothMode = true;
         
-        console.log('🎬 Interpolation system initialized');
+        console.log('Interpolation system initialized');
     }
 
     /**
@@ -467,7 +467,7 @@ export class InterpolationSystem {
      */
     setSmoothMode(enabled) {
         this.smoothMode = enabled;
-        console.log(`🎬 Smooth interpolation: ${enabled ? 'ON' : 'OFF'}`);
+        console.log(`Smooth interpolation: ${enabled ? 'ON' : 'OFF'}`);
     }
 
     /**
@@ -475,7 +475,7 @@ export class InterpolationSystem {
      */
     setRenderDelay(delay) {
         this.renderDelay = delay;
-        console.log(`⏱️ Render delay set to ${delay}ms`);
+        console.log(`Render delay set to ${delay}ms`);
     }
 
     /**
@@ -498,6 +498,6 @@ export class InterpolationSystem {
         this.voxelSnapshots = [];
         this.cameraSnapshots = [];
         this.playerSnapshots = [];
-        console.log('🧹 Interpolation snapshots cleared');
+        console.log('Interpolation snapshots cleared');
     }
 }

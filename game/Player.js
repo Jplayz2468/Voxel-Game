@@ -38,7 +38,7 @@ export class Player {
         this.bodyVoxels = [];
         this.createVoxelBody();
 
-        console.log(`👤 Player ${this.id} spawned with ${this.bodyVoxels.length} voxels (solid ${PLAYER_HALF_WIDTH*2}x${PLAYER_HALF_HEIGHT*2}x${PLAYER_HALF_WIDTH*2} cube) at [${this.centerPos[0]}, ${this.centerPos[1]}, ${this.centerPos[2]}]`);
+        console.log(`Player ${this.id} spawned with ${this.bodyVoxels.length} voxels (solid ${PLAYER_HALF_WIDTH*2}x${PLAYER_HALF_HEIGHT*2}x${PLAYER_HALF_WIDTH*2} cube) at [${this.centerPos[0]}, ${this.centerPos[1]}, ${this.centerPos[2]}]`);
     }
 
     /**
@@ -123,7 +123,7 @@ export class Player {
             this.centerPos[1] += dy * smoothingFactor;
             this.centerPos[2] += dz * smoothingFactor;
             
-            console.log(`🎯 Stabilizing player physics: limited center shift from ${shiftMagnitude.toFixed(2)} to ${maxCenterShift} units`);
+            console.log(`Stabilizing player physics: limited center shift from ${shiftMagnitude.toFixed(2)} to ${maxCenterShift} units`);
         }
 
         // Handle vertical physics (gravity and ground collision)
@@ -306,7 +306,7 @@ export class Player {
         if (this.grounded) {
             this.velY = JUMP_SPEED;
             this.grounded = false;
-            console.log(`🚀 Player ${this.id} jumped!`);
+            console.log(`Player ${this.id} jumped!`);
         }
     }
 

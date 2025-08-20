@@ -103,7 +103,7 @@
     
     <!-- UI Elements -->
     <div id="loading">
-        <h2>🎮 Loading Multiplayer Voxel Game...</h2>
+        <h2>Loading Multiplayer Voxel Game...</h2>
         <p>Connecting to server...</p>
     </div>
     
@@ -111,34 +111,34 @@
     
     <div id="debug" class="hidden">Connecting to server...</div>
     
-    <div id="connection-status" class="hidden">🔴 Disconnected from server</div>
+    <div id="connection-status" class="hidden">Disconnected from server</div>
     
-    <div id="ping-display" class="hidden">📡 Ping: --ms</div>
+    <div id="ping-display" class="hidden">Ping: --ms</div>
     
     <div id="instructions" class="hidden">
-        <strong>🎯 Destructible Voxel Players!</strong><br><br>
+        <strong>Destructible Voxel Players!</strong><br><br>
         
-        <strong>🎮 Controls:</strong><br>
+        <strong>Controls:</strong><br>
         WASD: Move around<br>
         Mouse: Look around<br>
         Space: Jump<br>
         Left Click: Shoot voxels<br>
         ESC: Exit mouse control<br><br>
         
-        <strong>⚙️ Settings:</strong><br>
+        <strong>Settings:</strong><br>
         T: Toggle Smooth/Raw mode<br>
         C: Toggle Color/Gray mode<br><br>
         
-        <strong>🏗️ Technical Features:</strong><br>
-        🧱 Players are hollow orange shells<br>
-        🎨 Greedy meshing for optimization<br>
-        👁️ Clean first-person view<br>
-        💥 Destructible player bodies<br>
-        🎯 Shoot other players apart!<br>
-        ⚡ 50 TPS server physics<br>
-        👥 Real-time multiplayer<br><br>
+        <strong>Technical Features:</strong><br>
+        Players are hollow orange shells<br>
+        Greedy meshing for optimization<br>
+        Clean first-person view<br>
+        Destructible player bodies<br>
+        Shoot other players apart!<br>
+        50 TPS server physics<br>
+        Real-time multiplayer<br><br>
         
-        <strong>🎲 How to Play:</strong><br>
+        <strong>How to Play:</strong><br>
         1. Move around with WASD<br>
         2. Aim with mouse<br>
         3. Shoot other players to knock voxels off<br>
@@ -160,7 +160,7 @@
          */
         async function initializeGame() {
             try {
-                console.log('🚀 Starting Multiplayer Voxel Client...');
+                console.log('Starting Multiplayer Voxel Client...');
                 
                 // Get canvas and set initial size
                 const canvas = document.getElementById('canvas');
@@ -185,14 +185,14 @@
                 client.start();
                 
                 isGameLoaded = true;
-                console.log('✅ Game initialized successfully!');
+                console.log('Game initialized successfully!');
                 
             } catch (error) {
-                console.error('❌ Failed to initialize game:', error);
+                console.error('Failed to initialize game:', error);
                 document.getElementById('loading').innerHTML = `
-                    <h2>❌ Failed to Load Game</h2>
+                    <h2>Failed to Load Game</h2>
                     <p>Error: ${error.message}</p>
-                    <button onclick="location.reload()">🔄 Retry</button>
+                    <button onclick="location.reload()">Retry</button>
                 `;
             }
         }
@@ -211,9 +211,9 @@
          */
         function handleVisibilityChange() {
             if (document.hidden) {
-                console.log('📱 Page hidden - game paused');
+                console.log('Page hidden - game paused');
             } else {
-                console.log('📱 Page visible - game resumed');
+                console.log('Page visible - game resumed');
             }
         }
 
@@ -222,7 +222,7 @@
          */
         function handleBeforeUnload() {
             if (client) {
-                console.log('👋 Page unloading - cleaning up...');
+                console.log('Page unloading - cleaning up...');
                 client.cleanup();
             }
         }
@@ -239,13 +239,13 @@
 
         // Error handling
         window.addEventListener('error', (event) => {
-            console.error('💥 Global error:', event.error);
+            console.error('Global error:', event.error);
             
             if (!isGameLoaded) {
                 document.getElementById('loading').innerHTML = `
-                    <h2>💥 Critical Error</h2>
+                    <h2>Critical Error</h2>
                     <p>${event.error.message}</p>
-                    <button onclick="location.reload()">🔄 Reload</button>
+                    <button onclick="location.reload()">Reload</button>
                 `;
             }
         });
@@ -272,7 +272,7 @@
         // Expose performance data for debugging
         window.getPerformanceLog = () => performanceLog;
 
-        console.log('📱 Client page loaded, waiting for game initialization...');
+        console.log('Client page loaded, waiting for game initialization...');
     </script>
 </body>
 </html>

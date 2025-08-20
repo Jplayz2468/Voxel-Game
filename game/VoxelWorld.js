@@ -18,7 +18,7 @@ export class VoxelWorld {
         
         this.generateWorld();
         
-        console.log('üåç Voxel world generated');
+        console.log('ç Voxel world generated');
     }
 
     /**
@@ -123,7 +123,7 @@ export class VoxelWorld {
         }
         
         this.terrainNeedsRebuild = false;
-        console.log('üîÑ Height map rebuilt');
+        console.log('Ñ Height map rebuilt');
     }
 
     /**
@@ -302,7 +302,7 @@ export class VoxelWorld {
         this.heights = new Int32Array(worldData.heights);
         this.terrainNeedsRebuild = true;
         
-        console.log(`üåç World imported from ${new Date(worldData.generatedAt).toLocaleString()}`);
+        console.log(`ç World imported from ${new Date(worldData.generatedAt).toLocaleString()}`);
     }
 
     /**
@@ -312,7 +312,7 @@ export class VoxelWorld {
         this.world.fill(0);
         this.heights.fill(0);
         this.terrainNeedsRebuild = true;
-        console.log('üßπ World cleared');
+        console.log('π World cleared');
     }
 
     /**
@@ -321,6 +321,6 @@ export class VoxelWorld {
     regenerateWorld() {
         this.clearWorld();
         this.generateWorld();
-        console.log('üåç World regenerated');
+        console.log('ç World regenerated');
     }
 }

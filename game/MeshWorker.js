@@ -6,7 +6,7 @@ importScripts('./constants.js');
 class MeshWorkerProcessor {
     constructor() {
         this.meshUpdatesProcessed = 0;
-        console.log('🔧 Mesh worker initialized');
+        console.log('Mesh worker initialized');
     }
 
     /**
@@ -112,7 +112,7 @@ class MeshWorkerProcessor {
         
         const { meshData, cameraPos, updateId, previousMesh } = data;
         
-        console.log(`🔄 Worker processing mesh update ${updateId}: ${meshData.vertices.length/3} vertices`);
+        console.log(`Worker processing mesh update ${updateId}: ${meshData.vertices.length/3} vertices`);
         
         // Perform heavy mesh filtering
         const filterStartTime = performance.now();
@@ -132,7 +132,7 @@ class MeshWorkerProcessor {
             const deltaStartTime = performance.now();
             deltaResult = this.computeMeshDelta(previousMesh, filtered);
             deltaTime = performance.now() - deltaStartTime;
-            console.log(`🔍 Worker delta comparison: ${deltaResult.vertexChanges.length} vertices changed (${deltaTime.toFixed(2)}ms)`);
+            console.log(`Worker delta comparison: ${deltaResult.vertexChanges.length} vertices changed (${deltaTime.toFixed(2)}ms)`);
         }
         
         // Calculate statistics
@@ -143,7 +143,7 @@ class MeshWorkerProcessor {
         
         const totalTime = performance.now() - startTime;
         
-        console.log(`⚡ Worker completed mesh update ${updateId}: Filter=${filterTime.toFixed(2)}ms, Delta=${deltaTime.toFixed(2)}ms, Total=${totalTime.toFixed(2)}ms, Hidden=${hiddenTriangles}/${originalTriangles} triangles (${hiddenPercent.toFixed(1)}%)`);
+        console.log(`Worker completed mesh update ${updateId}: Filter=${filterTime.toFixed(2)}ms, Delta=${deltaTime.toFixed(2)}ms, Total=${totalTime.toFixed(2)}ms, Hidden=${hiddenTriangles}/${originalTriangles} triangles (${hiddenPercent.toFixed(1)}%)`);
         
         // Return processed mesh data
         return {
@@ -263,10 +263,10 @@ self.addEventListener('message', function(event) {
                 data: result
             });
         } else {
-            console.warn(`⚠️ Unknown message type: ${type}`);
+            console.warn(`Unknown message type: ${type}`);
         }
     } catch (error) {
-        console.error('❌ Worker error:', error);
+        console.error('Worker error:', error);
         self.postMessage({
             type: 'meshError',
             data: {
@@ -277,4 +277,4 @@ self.addEventListener('message', function(event) {
     }
 });
 
-console.log('🚀 Mesh worker ready');
+console.log('Mesh worker ready');

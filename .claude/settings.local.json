@@ -6,7 +6,14 @@
       "Bash(node:*)",
       "Bash(python:*)",
       "Bash(taskkill:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(for file in *.js)",
+      "Bash(then echo \"$file\")",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(grep:*)"
     ],
     "defaultMode": "acceptEdits"
   }

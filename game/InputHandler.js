@@ -29,7 +29,7 @@ export class InputHandler {
         
         this.setupEventListeners();
         
-        console.log('🎮 Input handler initialized');
+        console.log('Input handler initialized');
     }
 
     /**
@@ -80,7 +80,7 @@ export class InputHandler {
     setupPointerLockEvents() {
         document.addEventListener('pointerlockchange', () => {
             this.pointerLocked = document.pointerLockElement === this.canvas;
-            console.log(`🖱️ Pointer lock: ${this.pointerLocked ? 'ON' : 'OFF'}`);
+            console.log(`Pointer lock: ${this.pointerLocked ? 'ON' : 'OFF'}`);
         });
     }
 
@@ -109,7 +109,7 @@ export class InputHandler {
         // Movement keys
         if (key in this.keys && !this.keys[key]) {
             this.keys[key] = true;
-            console.log(`🔑 Key pressed: ${key}`);
+            console.log(`Key pressed: ${key}`);
         }
 
         // Send input to server
@@ -130,7 +130,7 @@ export class InputHandler {
         // Movement keys
         if (key in this.keys && this.keys[key]) {
             this.keys[key] = false;
-            console.log(`🔑 Key released: ${key}`);
+            console.log(`Key released: ${key}`);
         }
 
         // Send input to server
@@ -186,7 +186,7 @@ export class InputHandler {
             cameraDir: cameraDir
         });
 
-        console.log('🔫 Shot fired!');
+        console.log('Shot fired!');
     }
 
     /**
@@ -212,7 +212,7 @@ export class InputHandler {
      */
     toggleSmoothMode() {
         this.smoothMode = !this.smoothMode;
-        console.log(`🎬 Interpolation mode: ${this.smoothMode ? 'SMOOTH' : 'RAW'}`);
+        console.log(`Interpolation mode: ${this.smoothMode ? 'SMOOTH' : 'RAW'}`);
         
         // Notify other systems about the change
         if (this.onSettingsChange) {
@@ -225,7 +225,7 @@ export class InputHandler {
      */
     toggleColorMode() {
         this.colorMode = !this.colorMode;
-        console.log(`🎨 Color mode: ${this.colorMode ? 'COLORED + DOTS' : 'GRAY ONLY'}`);
+        console.log(`Color mode: ${this.colorMode ? 'COLORED + DOTS' : 'GRAY ONLY'}`);
         
         // Notify other systems about the change
         if (this.onSettingsChange) {
@@ -316,16 +316,16 @@ export class InputHandler {
     handleDebugCommand(command) {
         switch (command.toLowerCase()) {
             case 'fps':
-                console.log('📊 FPS counter toggled');
+                console.log('FPS counter toggled');
                 break;
             case 'stats':
-                console.log('📈 Performance stats toggled');
+                console.log('Performance stats toggled');
                 break;
             case 'wireframe':
-                console.log('🔗 Wireframe mode toggled');
+                console.log('Wireframe mode toggled');
                 break;
             default:
-                console.log(`❓ Unknown debug command: ${command}`);
+                console.log(`Unknown debug command: ${command}`);
         }
     }
 
@@ -341,7 +341,7 @@ export class InputHandler {
             this.exitPointerLock();
         }
         
-        console.log('🔄 Input state reset');
+        console.log('Input state reset');
     }
 
     /**
@@ -350,6 +350,6 @@ export class InputHandler {
     cleanup() {
         // Remove event listeners would go here if needed
         this.reset();
-        console.log('🧹 Input handler cleaned up');
+        console.log('Input handler cleaned up');
     }
 }

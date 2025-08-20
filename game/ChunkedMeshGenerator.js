@@ -14,7 +14,7 @@ export class ChunkedMeshGenerator {
         this.chunkMeshCache = new Map(); // chunkId -> mesh data
         this.isInitialized = false;
         
-        console.log(`🗂️ Chunked mesh generator initialized: ${CHUNKS_PER_AXIS}x${CHUNKS_PER_AXIS} chunks (${CHUNK_SIZE}x${CHUNK_SIZE} each)`);
+        console.log(`Chunked mesh generator initialized: ${CHUNKS_PER_AXIS}x${CHUNKS_PER_AXIS} chunks (${CHUNK_SIZE}x${CHUNK_SIZE} each)`);
     }
 
     /**
@@ -24,7 +24,7 @@ export class ChunkedMeshGenerator {
         if (this.isInitialized) return;
         
         const startTime = performance.now();
-        console.log(`🚀 Pre-generating all ${CHUNKS_PER_AXIS * CHUNKS_PER_AXIS} chunks...`);
+        console.log(`Pre-generating all ${CHUNKS_PER_AXIS * CHUNKS_PER_AXIS} chunks...`);
         
         // Generate all chunks
         for (let chunkX = 0; chunkX < CHUNKS_PER_AXIS; chunkX++) {
@@ -37,7 +37,7 @@ export class ChunkedMeshGenerator {
         
         this.isInitialized = true;
         const totalTime = performance.now() - startTime;
-        console.log(`✅ All chunks pre-generated in ${totalTime.toFixed(2)}ms (${(totalTime / (CHUNKS_PER_AXIS * CHUNKS_PER_AXIS)).toFixed(2)}ms per chunk)`);
+        console.log(`All chunks pre-generated in ${totalTime.toFixed(2)}ms (${(totalTime / (CHUNKS_PER_AXIS * CHUNKS_PER_AXIS)).toFixed(2)}ms per chunk)`);
     }
 
     /**
@@ -81,7 +81,7 @@ export class ChunkedMeshGenerator {
                 this.chunkMeshCache.delete(backChunkId);
             }
             
-            console.log(`🔄 Marked chunk ${chunkId} dirty and invalidated cache at position (${x}, ${z})`);
+            console.log(`Marked chunk ${chunkId} dirty and invalidated cache at position (${x}, ${z})`);
         }
     }
 
@@ -111,13 +111,13 @@ export class ChunkedMeshGenerator {
             const deltaStartTime = performance.now();
             meshData = this.generateDeltaChunks(updatedChunkIds);
             combineTime = performance.now() - deltaStartTime;
-            console.log(`🔄 DELTA MODE: Sending only ${updatedChunkIds.length} updated chunks`);
+            console.log(`DELTA MODE: Sending only ${updatedChunkIds.length} updated chunks`);
         } else {
             // FULL MODE: Send the complete combined mesh
             const combineStartTime = performance.now();
             meshData = this.combineMeshes();
             combineTime = performance.now() - combineStartTime;
-            console.log(`🔄 FULL MODE: Sending complete mesh with all ${this.chunkMeshCache.size} chunks`);
+            console.log(`FULL MODE: Sending complete mesh with all ${this.chunkMeshCache.size} chunks`);
         }
         
         // Generate player templates (same as before)
@@ -131,7 +131,7 @@ export class ChunkedMeshGenerator {
         const updatedCount = updatedChunkIds.length;
         if (updatedCount > 0 || totalTime > 20) {
             const mode = updatedCount > 0 ? 'OPTIMIZED' : 'CACHED';
-            console.log(`📊 CHUNKED MESH PERFORMANCE BREAKDOWN (${mode}):`);
+            console.log(`CHUNKED MESH PERFORMANCE BREAKDOWN (${mode}):`);
             console.log(`   Init: ${initTime.toFixed(2)}ms`);
             console.log(`   Update ${updatedCount} chunks: ${updateTime.toFixed(2)}ms`);
             console.log(`   Combine all chunks: ${combineTime.toFixed(2)}ms`);
@@ -145,8 +145,8 @@ export class ChunkedMeshGenerator {
             `${Math.round((this.chunkMeshCache.size - updatedCount) / this.chunkMeshCache.size * 100)}% cached` : '';
             
         const logMessage = updatedCount > 0 ? 
-            `🔄 Chunked mesh: ${updatedCount} chunks regenerated, ${meshData.vertices.length/3} vertices total (${totalTime.toFixed(2)}ms) [${efficiency}]` :
-            `✅ Chunked mesh: all cached, ${meshData.vertices.length/3} vertices total (${totalTime.toFixed(2)}ms) [100% cached]`;
+            `Chunked mesh: ${updatedCount} chunks regenerated, ${meshData.vertices.length/3} vertices total (${totalTime.toFixed(2)}ms) [${efficiency}]` :
+            `Chunked mesh: all cached, ${meshData.vertices.length/3} vertices total (${totalTime.toFixed(2)}ms) [100% cached]`;
         console.log(logMessage);
 
         // For full mesh updates, also include all chunk data for client storage
@@ -180,7 +180,7 @@ export class ChunkedMeshGenerator {
         for (const chunkId of this.dirtyChunks) {
             const [chunkX, chunkZ] = chunkId.split('_').map(Number);
             
-            console.log(`🔧 Regenerating dirty chunk ${chunkId} (was cached: ${this.chunkMeshCache.has(chunkId)})`);
+            console.log(`Regenerating dirty chunk ${chunkId} (was cached: ${this.chunkMeshCache.has(chunkId)})`);
             
             // Always regenerate mesh for dirty chunks (don't trust cache)
             const chunkMesh = this.generateChunkMesh(world, chunkX, chunkZ);
@@ -189,7 +189,7 @@ export class ChunkedMeshGenerator {
             this.chunkMeshCache.set(chunkId, chunkMesh);
             updatedChunkIds.push(chunkId);
             
-            console.log(`✅ Chunk ${chunkId} regenerated: ${chunkMesh.vertices.length/3} vertices`);
+            console.log(`Chunk ${chunkId} regenerated: ${chunkMesh.vertices.length/3} vertices`);
         }
         
         // Clear dirty chunks
@@ -217,7 +217,7 @@ export class ChunkedMeshGenerator {
             });
         }
         
-        console.log(`📦 Providing all ${allChunks.length} chunks for full update`);
+        console.log(`Providing all ${allChunks.length} chunks for full update`);
         return allChunks;
     }
 
@@ -255,7 +255,7 @@ export class ChunkedMeshGenerator {
             }
         }
         
-        console.log(`🔄 Generated delta mesh: ${deltaChunks.length} chunks, ${vertices.length/3} vertices total`);
+        console.log(`Generated delta mesh: ${deltaChunks.length} chunks, ${vertices.length/3} vertices total`);
         
         return { 
             vertices, 
@@ -327,7 +327,7 @@ export class ChunkedMeshGenerator {
         
         // Log if combining is slow
         if (combineTime > 10) {
-            console.log(`⚠️ SLOW COMBINE: ${combineTime.toFixed(2)}ms to combine ${chunksProcessed} chunks into ${vertices.length/3} vertices`);
+            console.log(`SLOW COMBINE: ${combineTime.toFixed(2)}ms to combine ${chunksProcessed} chunks into ${vertices.length/3} vertices`);
         }
         
         return { vertices, normals, colors, indices };
@@ -385,7 +385,7 @@ export class ChunkedMeshGenerator {
         
         for (const [playerId, player] of players.entries()) {
             if (playerId === excludePlayerId) {
-                console.log(`🚫 EXCLUDING own player ${playerId} from template generation`);
+                console.log(`EXCLUDING own player ${playerId} from template generation`);
                 continue;
             }
 
@@ -616,6 +616,6 @@ export class ChunkedMeshGenerator {
     clearCache() {
         this.chunkMeshCache.clear();
         this.dirtyChunks.clear();
-        console.log('🗑️ Chunk mesh cache cleared');
+        console.log('Chunk mesh cache cleared');
     }
 }
