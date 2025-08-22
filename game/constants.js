@@ -18,6 +18,7 @@ export const STEP_HEIGHT = 6; // Max height player can step up
 // === PHYSICS ===
 export const SETTLE_SPEED_THRESHOLD = 3.0; // When moving voxels stop and become terrain
 export const VOXEL_SIZE = 0.45; // Size of individual voxels for collision
+export const PLAYER_VOXEL_DESTRUCTION_THRESHOLD = 15; // Minimum velocity to destroy player voxels
 
 // === NETWORK ===
 export const SERVER_TICK_RATE = 50; // Server physics runs at 50 TPS

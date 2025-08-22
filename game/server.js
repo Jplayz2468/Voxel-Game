@@ -64,7 +64,7 @@ const httpServer = http.createServer((req, res) => {
                 res.end(`
                     <h1>404 - File Not Found</h1>
                     <p>The requested file "${filePath}" was not found.</p>
-                    <a href="/">← Back to Game</a>
+                    <a href="/"><- Back to Game</a>
                 `);
             } else {
                 // Server error

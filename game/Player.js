@@ -34,6 +34,9 @@ export class Player {
         // Input state (which keys are pressed)
         this.keys = { w: false, s: false, a: false, d: false };
         
+        // Position tracking for velocity calculation
+        this.lastFramePos = [...this.centerPos];
+        
         // Player body made of voxels
         this.bodyVoxels = [];
         this.createVoxelBody();
@@ -135,6 +138,9 @@ export class Player {
         // Keep player within world boundaries
         this.enforceBoundaries();
 
+        // Store current position for next frame's velocity calculation
+        this.lastFramePos = [...this.centerPos];
+        
         // Check if player actually moved
         return oldCenter[0] !== this.centerPos[0] || 
                oldCenter[1] !== this.centerPos[1] || 

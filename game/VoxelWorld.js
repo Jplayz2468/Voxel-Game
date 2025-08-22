@@ -18,7 +18,7 @@ export class VoxelWorld {
         
         this.generateWorld();
         
-        console.log('ç Voxel world generated');
+        console.log(' Voxel world generated');
     }
 
     /**
@@ -31,7 +31,7 @@ export class VoxelWorld {
         // Generate terrain for each X,Z column
         for (let x = 0; x < WORLD_SIZE; x++) {
             for (let z = 0; z < WORLD_SIZE; z++) {
-                // Random terrain height variation (¬±2 blocks)
+                // Random terrain height variation (+/-2 blocks)
                 const terrainHeight = 16 + Math.floor((Math.random() - 0.5) * 4);
                 
                 // Fill column from base up to terrain height
@@ -123,7 +123,7 @@ export class VoxelWorld {
         }
         
         this.terrainNeedsRebuild = false;
-        console.log('Ñ Height map rebuilt');
+        console.log(' Height map rebuilt');
     }
 
     /**
@@ -302,7 +302,7 @@ export class VoxelWorld {
         this.heights = new Int32Array(worldData.heights);
         this.terrainNeedsRebuild = true;
         
-        console.log(`ç World imported from ${new Date(worldData.generatedAt).toLocaleString()}`);
+        console.log(` World imported from ${new Date(worldData.generatedAt).toLocaleString()}`);
     }
 
     /**
@@ -312,7 +312,7 @@ export class VoxelWorld {
         this.world.fill(0);
         this.heights.fill(0);
         this.terrainNeedsRebuild = true;
-        console.log('π World cleared');
+        console.log(' World cleared');
     }
 
     /**
@@ -321,6 +321,6 @@ export class VoxelWorld {
     regenerateWorld() {
         this.clearWorld();
         this.generateWorld();
-        console.log('ç World regenerated');
+        console.log(' World regenerated');
     }
 }

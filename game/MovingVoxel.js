@@ -1,7 +1,7 @@
 // MovingVoxel class - handles physics for individual voxels
 // These can be projectiles, debris, or parts of player bodies
 
-import { WORLD_SIZE, GRAVITY, SETTLE_SPEED_THRESHOLD, VOXEL_SIZE } from './constants.js';
+import { WORLD_SIZE, GRAVITY, SETTLE_SPEED_THRESHOLD, VOXEL_SIZE, PLAYER_VOXEL_DESTRUCTION_THRESHOLD } from './constants.js';
 
 export class MovingVoxel {
     constructor(pos, dir, isProjectile = true, throwerId = null, isPlayerVoxel = false, playerId = null) {
@@ -27,6 +27,12 @@ export class MovingVoxel {
         this.hasLeftThrowerHitbox = false; // Prevent hitting yourself immediately
         this.framesSinceLaunch = 0; // Track how long projectile has been flying
         this.throwerInitialPos = throwerId ? [...pos] : null;
+        
+        // No complex collision logic needed anymore
+        
+        // Velocity tracking for debugging
+        this.velocityHistory = []; // Track velocity changes over time
+        this.frameCount = 0;
     }
 
     /**
@@ -92,45 +98,75 @@ export class MovingVoxel {
     /**
      * Gets information about what the voxel collided with
      * Returns the block position and which axis was hit
+     * Improved accuracy for edge collisions
      */
     getCollisionInfo(x, y, z, server) {
         const s = this.size;
         
-        // Check corner positions to find the closest solid block
-        const checks = [
-            [x - s, y - s, z - s], [x + s, y - s, z - s],
-            [x - s, y + s, z - s], [x + s, y + s, z - s],
-            [x - s, y - s, z + s], [x + s, y - s, z + s],
-            [x - s, y + s, z + s], [x + s, y + s, z + s]
-        ];
-
-        let collisionBlock = null, minDistance = Infinity;
+        // First find which block the voxel center is actually inside or closest to
+        let collisionBlock = null;
         
-        for (const check of checks) {
-            const xi = Math.floor(check[0]);
-            const yi = Math.floor(check[1]);
-            const zi = Math.floor(check[2]);
+        // Check the block the voxel center is in first
+        const centerBlockX = Math.floor(x);
+        const centerBlockY = Math.floor(y);
+        const centerBlockZ = Math.floor(z);
+        
+        if (server.getWorld(centerBlockX, centerBlockY, centerBlockZ)) {
+            collisionBlock = [centerBlockX, centerBlockY, centerBlockZ];
+        } else {
+            // If center isn't in a block, check surrounding blocks that the voxel extends into
+            const checks = [
+                [Math.floor(x - s), Math.floor(y), Math.floor(z)],
+                [Math.floor(x + s), Math.floor(y), Math.floor(z)],
+                [Math.floor(x), Math.floor(y - s), Math.floor(z)],
+                [Math.floor(x), Math.floor(y + s), Math.floor(z)],
+                [Math.floor(x), Math.floor(y), Math.floor(z - s)],
+                [Math.floor(x), Math.floor(y), Math.floor(z + s)]
+            ];
             
-            if (server.getWorld(xi, yi, zi)) {
-                const dist = Math.sqrt((xi - x)**2 + (yi - y)**2 + (zi - z)**2);
-                if (dist < minDistance) {
-                    minDistance = dist;
-                    collisionBlock = [xi, yi, zi];
+            let minDistance = Infinity;
+            for (const check of checks) {
+                const [xi, yi, zi] = check;
+                if (server.getWorld(xi, yi, zi)) {
+                    // Calculate distance from voxel center to block center
+                    const blockCenterX = xi + 0.5;
+                    const blockCenterY = yi + 0.5;
+                    const blockCenterZ = zi + 0.5;
+                    const dist = Math.sqrt((x - blockCenterX)**2 + (y - blockCenterY)**2 + (z - blockCenterZ)**2);
+                    
+                    if (dist < minDistance) {
+                        minDistance = dist;
+                        collisionBlock = [xi, yi, zi];
+                    }
                 }
             }
         }
 
         if (!collisionBlock) return null;
 
-        // Determine which face was hit (X, Y, or Z axis)
-        const blockCenter = [collisionBlock[0] + 0.5, collisionBlock[1] + 0.5, collisionBlock[2] + 0.5];
-        const dx = Math.abs(x - blockCenter[0]);
-        const dy = Math.abs(y - blockCenter[1]);
-        const dz = Math.abs(z - blockCenter[2]);
-
+        // Determine which face was hit based on which side the voxel is closest to
+        const [bx, by, bz] = collisionBlock;
+        const blockCenterX = bx + 0.5;
+        const blockCenterY = by + 0.5;
+        const blockCenterZ = bz + 0.5;
+        
+        // Calculate how far the voxel extends past each face of the block
+        const leftOverlap = Math.max(0, (bx + 0.5) - (x - s));   // Left face (X-)
+        const rightOverlap = Math.max(0, (x + s) - (bx + 0.5));  // Right face (X+)
+        const bottomOverlap = Math.max(0, (by + 0.5) - (y - s)); // Bottom face (Y-)
+        const topOverlap = Math.max(0, (y + s) - (by + 0.5));    // Top face (Y+)
+        const backOverlap = Math.max(0, (bz + 0.5) - (z - s));   // Back face (Z-)
+        const frontOverlap = Math.max(0, (z + s) - (bz + 0.5));  // Front face (Z+)
+        
+        // Find the face with maximum penetration (most likely collision surface)
+        const maxOverlap = Math.max(leftOverlap, rightOverlap, bottomOverlap, topOverlap, backOverlap, frontOverlap);
+        
         let axis = 0; // Default to X axis
-        if (dy > dx && dy > dz) axis = 1; // Y axis
-        else if (dz > dx && dz > dy) axis = 2; // Z axis
+        if (maxOverlap === topOverlap || maxOverlap === bottomOverlap) {
+            axis = 1; // Y axis
+        } else if (maxOverlap === frontOverlap || maxOverlap === backOverlap) {
+            axis = 2; // Z axis
+        }
 
         return { block: collisionBlock, axis: axis };
     }
@@ -203,84 +239,16 @@ export class MovingVoxel {
 
     /**
      * Handles collision with a player voxel (part of a player's body)
-     * Can knock the voxel off the player if hit hard enough
+     * New system: velocity-based destruction with complete deletion
      */
-    handlePlayerVoxelCollision(playerVoxel, server) {
-        const speed = Math.sqrt(this.vel[0]**2 + this.vel[1]**2 + this.vel[2]**2);
-
-        // If this is a fast projectile, knock the player voxel off
-        if (speed > 10 && this.isProjectile && !this.hasCollided) {
-            console.log(`Projectile hit player voxel! Speed=${speed.toFixed(1)}, ProjectilePos=[${this.pos[0].toFixed(1)}, ${this.pos[1].toFixed(1)}, ${this.pos[2].toFixed(1)}], PlayerVoxelPos=[${playerVoxel.pos[0].toFixed(1)}, ${playerVoxel.pos[1].toFixed(1)}, ${playerVoxel.pos[2].toFixed(1)}]`);
-
-            // SMART EJECTION: Calculate safe exit point and realistic physics BEFORE removing from player
-            const owningPlayer = this.findPlayerOwningVoxel(playerVoxel, server);
-            const playerCenter = this.getPlayerCenterPosition(owningPlayer);
-            
-            // Convert player voxel to debris
-            playerVoxel.isPlayerVoxel = false;
-            playerVoxel.playerId = null;
-            
-            // Calculate ejection direction (from player center to voxel)
-            const ejectionDir = [
-                playerVoxel.pos[0] - playerCenter[0],
-                playerVoxel.pos[1] - playerCenter[1], 
-                playerVoxel.pos[2] - playerCenter[2]
-            ];
-            const ejectionLength = Math.sqrt(ejectionDir[0]**2 + ejectionDir[1]**2 + ejectionDir[2]**2);
-            
-            // Handle edge case: if voxel is exactly at center, use projectile direction
-            if (ejectionLength < 0.1) {
-                const projectileDir = Math.sqrt(this.vel[0]**2 + this.vel[1]**2 + this.vel[2]**2);
-                ejectionDir[0] = this.vel[0] / projectileDir;
-                ejectionDir[1] = this.vel[1] / projectileDir;
-                ejectionDir[2] = this.vel[2] / projectileDir;
-            } else {
-                // Normalize ejection direction
-                ejectionDir[0] /= ejectionLength;
-                ejectionDir[1] /= ejectionLength;
-                ejectionDir[2] /= ejectionLength;
-            }
-            
-            // Move voxel outside player body to prevent phasing
-            const safeDistance = 2.5; // Move it 2.5 units away from player center
-            playerVoxel.pos[0] = playerCenter[0] + ejectionDir[0] * safeDistance;
-            playerVoxel.pos[1] = playerCenter[1] + ejectionDir[1] * safeDistance;  
-            playerVoxel.pos[2] = playerCenter[2] + ejectionDir[2] * safeDistance;
-            
-            // Give velocity in ejection direction + randomness for visual variety
-            const baseEjectionSpeed = 15;
-            const randomVariation = 8;
-            playerVoxel.vel = [
-                ejectionDir[0] * baseEjectionSpeed + (Math.random() - 0.5) * randomVariation,
-                ejectionDir[1] * baseEjectionSpeed + Math.random() * 10 + 5, // Extra upward bias
-                ejectionDir[2] * baseEjectionSpeed + (Math.random() - 0.5) * randomVariation
-            ];
-            
-            console.log(`Smart ejection: PlayerCenter=[${playerCenter[0].toFixed(1)}, ${playerCenter[1].toFixed(1)}, ${playerCenter[2].toFixed(1)}], NewPos=[${playerVoxel.pos[0].toFixed(1)}, ${playerVoxel.pos[1].toFixed(1)}, ${playerVoxel.pos[2].toFixed(1)}], Vel=[${playerVoxel.vel[0].toFixed(1)}, ${playerVoxel.vel[1].toFixed(1)}, ${playerVoxel.vel[2].toFixed(1)}]`);
-
-            // Add it to the moving voxels list
-            server.movingVoxels.push(playerVoxel);
-            this.hasCollided = true;
-            
-            // Mark mesh for update since player voxel was destroyed
-            server.meshNeedsUpdate = true;
-            
-            // Slow down the projectile
-            this.vel[0] *= 0.2;
-            this.vel[1] *= 0.2;
-            this.vel[2] *= 0.2;
-
-            return true; // Voxel was removed from player
-        }
-
-        // Normal collision (bounce off)
-        this.handleVoxelCollision(playerVoxel);
+    handlePlayerVoxelCollision(playerVoxel, server, hitPlayerId) {
+        console.log(`SIMPLE COLLISION: Projectile hits player voxel - both die!`);
         
-        if (this.isProjectile) {
-            this.hasCollided = true;
-        }
+        // Mark mesh for update since player voxel was destroyed
+        server.meshNeedsUpdate = true;
         
-        return false; // Voxel stays on player
+        // Both the projectile AND the player voxel are destroyed
+        return 'kill_both';
     }
 
     /**
@@ -298,14 +266,14 @@ export class MovingVoxel {
 
         // Apply gravity
         this.vel[1] -= GRAVITY * dt;
-
-        // Check collisions with players BEFORE movement to prevent overshooting
-        if (this.isProjectile && !this.hasCollided) {
-            const preMovementResult = this.handlePlayerCollisions(server);
-            if (preMovementResult === 'continue') {
-                return 'continue'; // Hit player before moving
-            }
-        }
+        
+        // Track velocity for summary
+        this.frameCount++;
+        this.velocityHistory.push({
+            frame: this.frameCount,
+            vel: [this.vel[0], this.vel[1], this.vel[2]],
+            speed: Math.sqrt(this.vel[0]**2 + this.vel[1]**2 + this.vel[2]**2)
+        });
 
         // Calculate movement
         const startPos = [this.pos[0], this.pos[1], this.pos[2]];
@@ -341,11 +309,21 @@ export class MovingVoxel {
             this.pos[2] = endPos[2];
         }
 
-        // Check collisions with players EARLY - before terrain collision can slow us down
-        if (this.isProjectile && !this.hasCollided) {
-            const playerCollisionResult = this.handlePlayerCollisions(server);
-            if (playerCollisionResult === 'continue') {
-                return 'continue'; // Projectile hit a player, stop processing
+        // Check collisions with players using trajectory-based detection
+        if (this.isProjectile) {
+            // startPos is where we were before this movement
+            // this.pos is where we are now after movement
+            const actualStartPos = [
+                this.pos[0] - this.vel[0] * dt,
+                this.pos[1] - this.vel[1] * dt, 
+                this.pos[2] - this.vel[2] * dt
+            ];
+            const actualEndPos = [this.pos[0], this.pos[1], this.pos[2]];
+            
+            const playerCollisionResult = this.handlePlayerCollisionsTrajectory(actualStartPos, actualEndPos, server);
+            if (playerCollisionResult === 'kill_projectile') {
+                this.printVelocitySummary("KILLED BY PLAYER");
+                return 'kill_projectile';
             }
         }
 
@@ -416,9 +394,98 @@ export class MovingVoxel {
     }
 
     /**
-     * Handles projectile collisions with players
+     * Handles projectile collisions with players using trajectory-based detection
+     * Checks the path from startPos to endPos for any player voxel intersections
+     */
+    handlePlayerCollisionsTrajectory(startPos, endPos, server) {
+        if (server.players.size === 0) {
+            return;
+        }
+
+        // Calculate trajectory vector
+        const trajectory = [
+            endPos[0] - startPos[0],
+            endPos[1] - startPos[1], 
+            endPos[2] - startPos[2]
+        ];
+        const trajectoryLength = Math.sqrt(trajectory[0]**2 + trajectory[1]**2 + trajectory[2]**2);
+        
+        if (trajectoryLength < 0.001) return; // No movement
+
+        let closestCollision = null;
+        let closestT = Infinity;
+
+        for (const [playerId, player] of server.players.entries()) {
+            // Don't hit the player who shot this projectile until it's far enough away
+            if (playerId === this.throwerId && !this.hasLeftThrowerHitbox) {
+                const throwerCenter = player.getCenterPosition();
+                const dist = Math.sqrt(
+                    (startPos[0] - throwerCenter[0])**2 + 
+                    (startPos[1] - throwerCenter[1])**2 + 
+                    (startPos[2] - throwerCenter[2])**2
+                );
+                
+                if (dist < 20 && this.framesSinceLaunch < 10) {
+                    continue; // Skip thrower
+                }
+                this.hasLeftThrowerHitbox = true;
+            }
+
+            // Check each voxel in the player's body
+            for (let i = player.bodyVoxels.length - 1; i >= 0; i--) {
+                const playerVoxel = player.bodyVoxels[i];
+                
+                // Find intersection of trajectory with this player voxel
+                const t = this.findTrajectoryVoxelIntersection(startPos, trajectory, trajectoryLength, playerVoxel);
+                
+                if (t !== null && t >= 0 && t <= 1 && t < closestT) {
+                    closestCollision = {
+                        t: t,
+                        playerId: playerId,
+                        playerVoxelIndex: i,
+                        player: player,
+                        playerVoxel: playerVoxel
+                    };
+                    closestT = t;
+                }
+            }
+        }
+
+        // If we found a collision, handle the FIRST one
+        if (closestCollision) {
+            const collisionPos = [
+                startPos[0] + trajectory[0] * closestCollision.t,
+                startPos[1] + trajectory[1] * closestCollision.t,
+                startPos[2] + trajectory[2] * closestCollision.t
+            ];
+            
+            console.log(`TRAJECTORY COLLISION at t=${closestCollision.t.toFixed(3)}, pos=[${collisionPos[0].toFixed(1)}, ${collisionPos[1].toFixed(1)}, ${collisionPos[2].toFixed(1)}]`);
+            
+            // Move projectile to exact collision point
+            this.pos[0] = collisionPos[0];
+            this.pos[1] = collisionPos[1]; 
+            this.pos[2] = collisionPos[2];
+            
+            // Handle the collision
+            const collisionResult = this.handlePlayerVoxelCollision(closestCollision.playerVoxel, server, closestCollision.playerId);
+            if (collisionResult === 'kill_both') {
+                closestCollision.player.bodyVoxels.splice(closestCollision.playerVoxelIndex, 1); // Remove player voxel
+                return 'kill_projectile'; // Kill the projectile too
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Old point-based collision detection (kept as fallback)
      */
     handlePlayerCollisions(server) {
+        if (server.players.size === 0) {
+            console.log(`[DEBUG] No players to check collision with`);
+            return;
+        }
+        
         for (const [playerId, player] of server.players.entries()) {
             // Don't hit the player who shot this projectile until it's far enough away
             if (playerId === this.throwerId && !this.hasLeftThrowerHitbox) {
@@ -435,8 +502,12 @@ export class MovingVoxel {
                     continue; // Skip this player
                 }
             }
+            
+            // No immunity logic - simple collision
 
             // Check collision with each voxel in the player's body
+            console.log(`[DEBUG] Checking collision with player ${playerId}: ${player.bodyVoxels.length} voxels`);
+            
             for (let i = player.bodyVoxels.length - 1; i >= 0; i--) {
                 const playerVoxel = player.bodyVoxels[i];
                 
@@ -447,20 +518,26 @@ export class MovingVoxel {
                 const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
                 const minDistance = this.size + playerVoxel.size;
                 
+                // Debug first few voxels
+                if (i < 3) {
+                    console.log(`[DEBUG] Voxel ${i}: projectile=[${this.pos[0].toFixed(1)}, ${this.pos[1].toFixed(1)}, ${this.pos[2].toFixed(1)}], playerVoxel=[${playerVoxel.pos[0].toFixed(1)}, ${playerVoxel.pos[1].toFixed(1)}, ${playerVoxel.pos[2].toFixed(1)}], distance=${distance.toFixed(2)}, minDist=${minDistance.toFixed(2)}`);
+                }
+                
                 if (this.checkVoxelToVoxelCollision(playerVoxel)) {
                     console.log(`Collision detected! Distance=${distance.toFixed(2)}, MinDistance=${minDistance.toFixed(2)}, ProjectileSpeed=${Math.sqrt(this.vel[0]**2 + this.vel[1]**2 + this.vel[2]**2).toFixed(1)}`);
                     
-                    const wasRemoved = this.handlePlayerVoxelCollision(playerVoxel, server);
-                    if (wasRemoved) {
-                        player.bodyVoxels.splice(i, 1); // Remove voxel from player
-                        return 'continue';
+                    const collisionResult = this.handlePlayerVoxelCollision(playerVoxel, server, playerId);
+                    if (collisionResult === 'kill_both') {
+                        player.bodyVoxels.splice(i, 1); // Remove player voxel
+                        return 'kill_projectile'; // Kill the projectile too
                     }
                     
-                    if (this.isProjectile && this.hasCollided) {
-                        return 'continue';
-                    }
+                    // Only process one collision per frame
+                    return;
                 }
             }
+            
+            console.log(`[DEBUG] No collisions found with player ${playerId}`);
         }
     }
 
@@ -482,6 +559,7 @@ export class MovingVoxel {
 
         // If moving slowly, try to settle
         if (speed < SETTLE_SPEED_THRESHOLD || posChange < 0.05) {
+            this.printVelocitySummary("SETTLING");
             return this.settleToGrid(server);
         }
 
@@ -601,6 +679,7 @@ export class MovingVoxel {
                 server.chunkedMeshGenerator.markPositionDirty(gridX, gridZ);
             }
             console.log(`Voxel settled at ${gridX},${gridY},${gridZ}`);
+            this.printVelocitySummary("SETTLED");
             return 'settled';
         }
         return 'continue';
@@ -682,4 +761,136 @@ export class MovingVoxel {
         }
         return null; // Voxel not found in any player
     }
+
+    /**
+     * Finds the intersection parameter t where the trajectory intersects a player voxel
+     * Returns t value (0-1) where intersection occurs, or null if no intersection
+     */
+    findTrajectoryVoxelIntersection(startPos, trajectory, trajectoryLength, playerVoxel) {
+        // Treat both projectile and player voxel as spheres for simplicity
+        const projectileRadius = this.size;
+        const playerVoxelRadius = playerVoxel.size;
+        const combinedRadius = projectileRadius + playerVoxelRadius;
+        
+        // Vector from start position to player voxel center
+        const toVoxel = [
+            playerVoxel.pos[0] - startPos[0],
+            playerVoxel.pos[1] - startPos[1],
+            playerVoxel.pos[2] - startPos[2]
+        ];
+        
+        // Project toVoxel onto trajectory to find closest approach point
+        const trajectoryDot = trajectory[0]**2 + trajectory[1]**2 + trajectory[2]**2;
+        if (trajectoryDot < 0.001) return null; // No movement
+        
+        const projectionLength = (toVoxel[0] * trajectory[0] + toVoxel[1] * trajectory[1] + toVoxel[2] * trajectory[2]) / trajectoryDot;
+        
+        // Clamp to trajectory bounds
+        const clampedT = Math.max(0, Math.min(1, projectionLength));
+        
+        // Find closest point on trajectory
+        const closestPoint = [
+            startPos[0] + trajectory[0] * clampedT,
+            startPos[1] + trajectory[1] * clampedT,
+            startPos[2] + trajectory[2] * clampedT
+        ];
+        
+        // Check distance from closest point to player voxel
+        const dx = closestPoint[0] - playerVoxel.pos[0];
+        const dy = closestPoint[1] - playerVoxel.pos[1];
+        const dz = closestPoint[2] - playerVoxel.pos[2];
+        const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
+        
+        // If within combined radius, we have an intersection
+        if (distance <= combinedRadius) {
+            // For more accuracy, calculate the actual intersection point
+            // Use quadratic formula to solve for exact intersection
+            const a = trajectoryDot;
+            const b = 2 * (trajectory[0] * (startPos[0] - playerVoxel.pos[0]) + 
+                           trajectory[1] * (startPos[1] - playerVoxel.pos[1]) + 
+                           trajectory[2] * (startPos[2] - playerVoxel.pos[2]));
+            const c = (startPos[0] - playerVoxel.pos[0])**2 + 
+                      (startPos[1] - playerVoxel.pos[1])**2 + 
+                      (startPos[2] - playerVoxel.pos[2])**2 - combinedRadius**2;
+            
+            const discriminant = b*b - 4*a*c;
+            
+            if (discriminant >= 0) {
+                // Two solutions - we want the first intersection (smaller t)
+                const sqrtDiscriminant = Math.sqrt(discriminant);
+                const t1 = (-b - sqrtDiscriminant) / (2*a);
+                const t2 = (-b + sqrtDiscriminant) / (2*a);
+                
+                // Return the first valid intersection
+                if (t1 >= 0 && t1 <= 1) return t1;
+                if (t2 >= 0 && t2 <= 1) return t2;
+            }
+            
+            // Fallback to clamped approach point
+            return clampedT;
+        }
+        
+        return null; // No intersection
+    }
+
+    /**
+     * Prints a summary of velocity changes over the voxel's lifetime
+     */
+    printVelocitySummary(reason) {
+        if (this.velocityHistory.length === 0) return;
+        
+        // Find significant velocity changes (flips, reductions, etc.)
+        const significantChanges = [];
+        let prevVel = null;
+        
+        for (let i = 0; i < this.velocityHistory.length; i++) {
+            const current = this.velocityHistory[i];
+            
+            if (prevVel) {
+                // Check for velocity flip (opposite direction)
+                const prevDir = [Math.sign(prevVel.vel[0]), Math.sign(prevVel.vel[1]), Math.sign(prevVel.vel[2])];
+                const currDir = [Math.sign(current.vel[0]), Math.sign(current.vel[1]), Math.sign(current.vel[2])];
+                
+                const xFlip = prevDir[0] !== 0 && currDir[0] !== 0 && prevDir[0] !== currDir[0];
+                const zFlip = prevDir[2] !== 0 && currDir[2] !== 0 && prevDir[2] !== currDir[2];
+                
+                if (xFlip || zFlip) {
+                    significantChanges.push({
+                        frame: current.frame,
+                        type: 'FLIP',
+                        from: prevVel.vel,
+                        to: current.vel
+                    });
+                }
+                
+                // Check for large speed changes (>50% reduction or increase)
+                const speedChange = Math.abs(current.speed - prevVel.speed) / prevVel.speed;
+                if (speedChange > 0.5) {
+                    significantChanges.push({
+                        frame: current.frame,
+                        type: speedChange > 0 ? 'SPEEDUP' : 'SLOWDOWN',
+                        from: prevVel.speed.toFixed(1),
+                        to: current.speed.toFixed(1)
+                    });
+                }
+            }
+            
+            prevVel = current;
+        }
+        
+        // Print summary
+        const firstVel = this.velocityHistory[0];
+        const lastVel = this.velocityHistory[this.velocityHistory.length - 1];
+        
+        console.log(`[VELOCITY SUMMARY] ${this.id.slice(-4)} ${reason} after ${this.frameCount} frames:`);
+        console.log(`  Initial: [${firstVel.vel[0].toFixed(1)}, ${firstVel.vel[1].toFixed(1)}, ${firstVel.vel[2].toFixed(1)}] speed=${firstVel.speed.toFixed(1)}`);
+        console.log(`  Final:   [${lastVel.vel[0].toFixed(1)}, ${lastVel.vel[1].toFixed(1)}, ${lastVel.vel[2].toFixed(1)}] speed=${lastVel.speed.toFixed(1)}`);
+        
+        if (significantChanges.length > 0) {
+            console.log(`  Changes: ${significantChanges.map(c => `F${c.frame}:${c.type}`).join(', ')}`);
+        } else {
+            console.log(`  Changes: None (smooth trajectory)`);
+        }
+    }
+
 }

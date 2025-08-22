@@ -53,7 +53,7 @@ export class WebGLRenderer {
         this.workerBusyCount = 0; // Track how many updates are queued in worker
         this.maxWorkerQueue = 2; // Max updates to queue before falling back to main thread
         
-        console.log('® WebGL renderer initialized');
+        console.log(' WebGL renderer initialized');
     }
 
     /**
@@ -166,7 +166,7 @@ export class WebGLRenderer {
                 this.meshWorker = null; // Fall back to main thread processing
             });
             
-            console.log('µ Mesh worker initialized');
+            console.log(' Mesh worker initialized');
         } catch (error) {
             console.warn(' Failed to create mesh worker, falling back to main thread:', error);
             this.meshWorker = null;
@@ -188,7 +188,7 @@ export class WebGLRenderer {
                 // Time the worker processing step (just for logging, work already done)
                 this.perfDebugger?.timeStep(debugUpdateId, 'Worker Processing', () => {
                     // Record the worker time breakdown
-                    console.log(`µ Worker breakdown: Filter=${stats.filterTime.toFixed(2)}ms, Delta=${stats.deltaTime.toFixed(2)}ms, Total=${stats.processingTime.toFixed(2)}ms`);
+                    console.log(` Worker breakdown: Filter=${stats.filterTime.toFixed(2)}ms, Delta=${stats.deltaTime.toFixed(2)}ms, Total=${stats.processingTime.toFixed(2)}ms`);
                 });
                 
                 // Apply the processed mesh with delta optimization
@@ -229,12 +229,12 @@ export class WebGLRenderer {
         
         if (deltaResult && deltaResult.changeRatio <= changeThreshold) {
             // Use the pre-computed delta for efficient update
-            console.log(`Ñ Using worker delta result: ${deltaResult.vertexChanges.length} vertices changed (${(deltaResult.changeRatio * 100).toFixed(1)}%)`);
+            console.log(` Using worker delta result: ${deltaResult.vertexChanges.length} vertices changed (${(deltaResult.changeRatio * 100).toFixed(1)}%)`);
             this.applyWorkerDelta(processedMesh, deltaResult);
         } else {
             // Full upload (either no delta or too many changes)
             const reason = deltaResult ? `${(deltaResult.changeRatio * 100).toFixed(1)}% changed` : 'no previous mesh';
-            console.log(`¶ Using full upload: ${reason}`);
+            console.log(` Using full upload: ${reason}`);
             
             this.terrainMesh = {
                 vertices: processedMesh.vertices,
@@ -257,7 +257,7 @@ export class WebGLRenderer {
         
         // Log statistics occasionally
         if (this.meshUpdatesReceived % 60 === 0) {
-            console.log(`Å Threaded filtering: ${stats.hiddenTriangles}/${stats.originalTriangles} triangles hidden (${stats.hiddenPercent.toFixed(1)}%) in ${stats.filterTime.toFixed(2)}ms`);
+            console.log(` Threaded filtering: ${stats.hiddenTriangles}/${stats.originalTriangles} triangles hidden (${stats.hiddenPercent.toFixed(1)}%) in ${stats.filterTime.toFixed(2)}ms`);
         }
         
         // Complete debugging
@@ -285,7 +285,7 @@ export class WebGLRenderer {
                 gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.color);
                 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(newMesh.colors), gl.DYNAMIC_DRAW);
                 
-                console.log(`à Buffers resized: ${this.terrainMesh.vertices.length} ‚Üí ${newMesh.vertices.length} vertices`);
+                console.log(`Buffers resized: ${this.terrainMesh.vertices.length} -> ${newMesh.vertices.length} vertices`);
             } else {
                 // Update individual vertex changes with bufferSubData
                 gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position);
@@ -312,7 +312,7 @@ export class WebGLRenderer {
                     }
                 }
                 
-                console.log(`Ø Delta GPU update: ${deltaResult.vertexChanges.length} vertices updated with bufferSubData`);
+                console.log(` Delta GPU update: ${deltaResult.vertexChanges.length} vertices updated with bufferSubData`);
             }
         }
         
@@ -355,7 +355,7 @@ export class WebGLRenderer {
         
         // Log statistics occasionally
         if (this.meshUpdatesReceived % 60 === 0) {
-            console.log(`Å Threaded filtering: ${stats.hiddenTriangles}/${stats.originalTriangles} triangles hidden (${stats.hiddenPercent.toFixed(1)}%) in ${stats.filterTime.toFixed(2)}ms`);
+            console.log(` Threaded filtering: ${stats.hiddenTriangles}/${stats.originalTriangles} triangles hidden (${stats.hiddenPercent.toFixed(1)}%) in ${stats.filterTime.toFixed(2)}ms`);
         }
         
         // Complete debugging
@@ -446,7 +446,7 @@ export class WebGLRenderer {
                 this.workerBusyCount++;
                 
                 const queueTime = performance.now() - startTime;
-                console.log(`Ä Queued mesh update ${updateId} to worker: ${(meshData.vertices || []).length/3} vertices (${queueTime.toFixed(2)}ms queue time, ${this.workerBusyCount}/${this.maxWorkerQueue} queued)`);
+                console.log(` Queued mesh update ${updateId} to worker: ${(meshData.vertices || []).length/3} vertices (${queueTime.toFixed(2)}ms queue time, ${this.workerBusyCount}/${this.maxWorkerQueue} queued)`);
             });
             
         } else {
@@ -530,12 +530,12 @@ export class WebGLRenderer {
                         chunkZ: chunk.chunkZ
                     });
                 }
-                console.log(`¶ Stored ${meshData.deltaChunks.length} chunks from full mesh update`);
+                console.log(` Stored ${meshData.deltaChunks.length} chunks from full mesh update`);
             }
         }
         
         const totalTime = performance.now() - startTime;
-        console.log(`® Updated terrain mesh (main thread): ${this.terrainMesh.vertices.length/3} vertices (${totalTime.toFixed(2)}ms)`);
+        console.log(` Updated terrain mesh (main thread): ${this.terrainMesh.vertices.length/3} vertices (${totalTime.toFixed(2)}ms)`);
         
         // Complete debugging
         this.perfDebugger?.completeTerrainUpdate(debugUpdateId);
@@ -555,7 +555,7 @@ export class WebGLRenderer {
         // If this is the first chunk update but we haven't received full terrain yet,
         // treat it as a full terrain update
         if (!this.hasReceivedFullTerrain) {
-            console.log(`Ñ First terrain load: Treating chunk update as full terrain`);
+            console.log(` First terrain load: Treating chunk update as full terrain`);
             this.updateTerrainMesh(meshData, cameraPos);
             this.hasReceivedFullTerrain = true;
             
@@ -571,7 +571,7 @@ export class WebGLRenderer {
                         chunkZ: chunk.chunkZ
                     });
                 }
-                console.log(`¶ Stored ${meshData.deltaChunks.length} initial chunks`);
+                console.log(` Stored ${meshData.deltaChunks.length} initial chunks`);
             }
             
             this.perfDebugger?.completeTerrainUpdate(debugUpdateId);
@@ -580,7 +580,7 @@ export class WebGLRenderer {
         
         // Handle selective chunk updates
         if (meshData.deltaChunks && meshData.deltaChunks.length > 0) {
-            console.log(`Ñ Selective chunk update: ${meshData.deltaChunks.length} chunks`);
+            console.log(` Selective chunk update: ${meshData.deltaChunks.length} chunks`);
             
             // Update only the specified chunks in memory
             const chunkUpdateStartTime = performance.now();
@@ -595,12 +595,12 @@ export class WebGLRenderer {
                     chunkZ: chunk.chunkZ
                 });
                 updatedChunkIds.push(chunk.chunkId);
-                console.log(`¶ Updated chunk ${chunk.chunkId} (${chunk.chunkX}, ${chunk.chunkZ}): ${chunk.vertices.length/3} vertices`);
+                console.log(` Updated chunk ${chunk.chunkId} (${chunk.chunkX}, ${chunk.chunkZ}): ${chunk.vertices.length/3} vertices`);
             }
             const chunkUpdateTime = performance.now() - chunkUpdateStartTime;
             
             // EFFICIENT: Update only the changed chunks instead of rebuilding everything
-            console.log(`Ä EFFICIENT CHUNK UPDATE: Only updating ${updatedChunkIds.length} changed chunks (preserving ${this.terrainChunks.size - updatedChunkIds.length} unchanged)`);
+            console.log(` EFFICIENT CHUNK UPDATE: Only updating ${updatedChunkIds.length} changed chunks (preserving ${this.terrainChunks.size - updatedChunkIds.length} unchanged)`);
             const efficientUpdateStartTime = performance.now();
             this.updateOnlyChangedChunks(updatedChunkIds, cameraPos);
             const efficientUpdateTime = performance.now() - efficientUpdateStartTime;
@@ -614,12 +614,12 @@ export class WebGLRenderer {
             };
         } else {
             // No delta chunks, fall back to full update
-            console.log(`Ñ No delta chunks provided, falling back to full update`);
+            console.log(` No delta chunks provided, falling back to full update`);
             this.updateTerrainMesh(meshData, cameraPos);
         }
         
         const totalTime = performance.now() - startTime;
-        console.log(`Ñ Chunk update completed: ${totalTime.toFixed(2)}ms`);
+        console.log(` Chunk update completed: ${totalTime.toFixed(2)}ms`);
         
         // Complete debugging
         this.perfDebugger?.completeTerrainUpdate(debugUpdateId);
@@ -660,7 +660,7 @@ export class WebGLRenderer {
             chunksProcessed: updatedChunkIds.length
         };
         
-        console.log(`Ä EFFICIENT UPDATE: ${updatedChunkIds.length} chunks in ${totalTime.toFixed(2)}ms (Filter=${totalFilterTime.toFixed(2)}ms, Upload=${totalUploadTime.toFixed(2)}ms)`);
+        console.log(` EFFICIENT UPDATE: ${updatedChunkIds.length} chunks in ${totalTime.toFixed(2)}ms (Filter=${totalFilterTime.toFixed(2)}ms, Upload=${totalUploadTime.toFixed(2)}ms)`);
     }
 
     /**
@@ -683,7 +683,7 @@ export class WebGLRenderer {
         const totalChunks = this.terrainChunks.size;
         const changeRatio = numChangedChunks / totalChunks;
         
-        console.log(`Ñ Selective update: ${numChangedChunks}/${totalChunks} chunks changed (${(changeRatio * 100).toFixed(1)}%)`);
+        console.log(` Selective update: ${numChangedChunks}/${totalChunks} chunks changed (${(changeRatio * 100).toFixed(1)}%)`);
         
         // If only a small portion changed, we can still benefit from the chunk system
         // by avoiding mesh generation for unchanged chunks (already done by server)
@@ -691,7 +691,7 @@ export class WebGLRenderer {
         this.rebuildTerrainFromChunks(cameraPos);
         
         const updateTime = performance.now() - startTime;
-        console.log(`Ø Smart chunk update: rebuilt from ${totalChunks} cached chunks (${updateTime.toFixed(2)}ms)`);
+        console.log(` Smart chunk update: rebuilt from ${totalChunks} cached chunks (${updateTime.toFixed(2)}ms)`);
     }
     
     /**
@@ -773,8 +773,8 @@ export class WebGLRenderer {
             vertexCount: filteredMesh.vertices.length / 3
         };
         
-        console.log(`ß Rebuilt terrain from ${chunkCount} chunks: ${filteredMesh.vertices.length/3} vertices (${rebuildTime.toFixed(2)}ms)`);
-        console.log(`ß REBUILD BREAKDOWN: Combine=${combineTime.toFixed(2)}ms, Filter=${filterTime.toFixed(2)}ms, Update=${updateTime.toFixed(2)}ms, Upload=${uploadTime.toFixed(2)}ms, Copy=${copyTime.toFixed(2)}ms`);
+        console.log(` Rebuilt terrain from ${chunkCount} chunks: ${filteredMesh.vertices.length/3} vertices (${rebuildTime.toFixed(2)}ms)`);
+        console.log(` REBUILD BREAKDOWN: Combine=${combineTime.toFixed(2)}ms, Filter=${filterTime.toFixed(2)}ms, Update=${updateTime.toFixed(2)}ms, Upload=${uploadTime.toFixed(2)}ms, Copy=${copyTime.toFixed(2)}ms`);
     }
 
     /**
@@ -965,7 +965,7 @@ export class WebGLRenderer {
         const changeRatio = changedVertices / (totalVertices / 3);
         
         if (changeRatio > changeThreshold) {
-            console.log(`ä Delta update: ${(changeRatio * 100).toFixed(1)}% changed, using full update`);
+            console.log(` Delta update: ${(changeRatio * 100).toFixed(1)}% changed, using full update`);
             this.terrainMesh = {
                 vertices: newMesh.vertices,
                 normals: newMesh.normals,
@@ -985,7 +985,7 @@ export class WebGLRenderer {
         
         const totalDeltaTime = performance.now() - deltaStartTime;
         
-        console.log(`Ñ Delta update: ${changedVertices} vertices changed (${(changeRatio * 100).toFixed(1)}%), Comparison=${comparisonTime.toFixed(2)}ms, Upload=${updateTime.toFixed(2)}ms, Total=${totalDeltaTime.toFixed(2)}ms`);
+        console.log(` Delta update: ${changedVertices} vertices changed (${(changeRatio * 100).toFixed(1)}%), Comparison=${comparisonTime.toFixed(2)}ms, Upload=${updateTime.toFixed(2)}ms, Total=${totalDeltaTime.toFixed(2)}ms`);
     }
 
     /**
@@ -1067,7 +1067,7 @@ export class WebGLRenderer {
             if (newMesh.vertices.length > this.terrainMesh.vertices.length) {
                 // Buffer needs to grow - reallocate
                 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(newMesh.vertices), gl.DYNAMIC_DRAW);
-                console.log(`à Vertex buffer resized: ${this.terrainMesh.vertices.length} ‚Üí ${newMesh.vertices.length}`);
+                console.log(`Vertex buffer resized: ${this.terrainMesh.vertices.length} -> ${newMesh.vertices.length}`);
             } else {
                 // Update individual vertex changes
                 for (const change of delta.vertexChanges) {
@@ -1238,7 +1238,7 @@ export class WebGLRenderer {
             const originalTriangles = indices.length / 3;
             const filteredTriangles = filteredIndices.length / 3;
             const hiddenTriangles = originalTriangles - filteredTriangles;
-            console.log(`Å Filtered ${hiddenTriangles}/${originalTriangles} triangles (${(hiddenTriangles/originalTriangles*100).toFixed(1)}% hidden for first-person view)`);
+            console.log(` Filtered ${hiddenTriangles}/${originalTriangles} triangles (${(hiddenTriangles/originalTriangles*100).toFixed(1)}% hidden for first-person view)`);
         }
     }
 
@@ -1285,7 +1285,7 @@ export class WebGLRenderer {
         
         // Log detailed GPU upload timing occasionally
         if (this.meshUpdatesReceived % 30 === 0) {
-            console.log(`ä GPU Upload breakdown: Vertices=${vertexTime.toFixed(2)}ms, Normals=${normalTime.toFixed(2)}ms, Colors=${colorTime.toFixed(2)}ms, Indices=${indexTime.toFixed(2)}ms, Total=${totalUploadTime.toFixed(2)}ms`);
+            console.log(` GPU Upload breakdown: Vertices=${vertexTime.toFixed(2)}ms, Normals=${normalTime.toFixed(2)}ms, Colors=${colorTime.toFixed(2)}ms, Indices=${indexTime.toFixed(2)}ms, Total=${totalUploadTime.toFixed(2)}ms`);
         }
     }
 
@@ -1497,14 +1497,14 @@ export class WebGLRenderer {
         if (voxels.length === 0) return;
         
         const renderStartTime = performance.now();
-        console.log(`Æ Rendering ${voxels.length} moving voxels`);
+        console.log(` Rendering ${voxels.length} moving voxels`);
 
         // TEMP: Disable culling for moving voxels to test visibility
         const cullingStartTime = performance.now();
         const culledVoxels = voxels; // Skip culling entirely
         const cullingTime = performance.now() - cullingStartTime;
         
-        console.log(`ç Culling disabled: ${culledVoxels.length}/${voxels.length} voxels will render (${cullingTime.toFixed(2)}ms)`);
+        console.log(` Culling disabled: ${culledVoxels.length}/${voxels.length} voxels will render (${cullingTime.toFixed(2)}ms)`);
         
         if (culledVoxels.length === 0) return;
 
@@ -1513,7 +1513,7 @@ export class WebGLRenderer {
         const { vertices, normals, colors, indices } = this.generateVoxelMesh(culledVoxels, enableColorMode);
         const meshTime = performance.now() - meshStartTime;
         
-        console.log(`ó Generated mesh: ${vertices.length/3} vertices, ${indices.length/3} triangles (${meshTime.toFixed(2)}ms)`);
+        console.log(` Generated mesh: ${vertices.length/3} vertices, ${indices.length/3} triangles (${meshTime.toFixed(2)}ms)`);
         
         // Render the mesh
         const drawStartTime = performance.now();
@@ -1521,7 +1521,7 @@ export class WebGLRenderer {
         const drawTime = performance.now() - drawStartTime;
         
         const totalTime = performance.now() - renderStartTime;
-        console.log(`• Moving voxel render complete: Mesh=${meshTime.toFixed(2)}ms, Draw=${drawTime.toFixed(2)}ms, Total=${totalTime.toFixed(2)}ms`);
+        console.log(` Moving voxel render complete: Mesh=${meshTime.toFixed(2)}ms, Draw=${drawTime.toFixed(2)}ms, Total=${totalTime.toFixed(2)}ms`);
     }
 
     /**
@@ -1829,9 +1829,9 @@ export class WebGLRenderer {
         if (this.meshWorker) {
             this.meshWorker.terminate();
             this.meshWorker = null;
-            console.log('µ Mesh worker terminated');
+            console.log(' Mesh worker terminated');
         }
         
-        console.log('π WebGL renderer cleaned up');
+        console.log(' WebGL renderer cleaned up');
     }
 }
